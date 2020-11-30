@@ -18,7 +18,8 @@ JAM consists of two sides: client and server.
 Server side uses SQLite as a database to store info about users, messages and files.
 <details>
   <summary>DB schema for server side:</summary>
-  ![Server Schema](docs/database_shema_server.png)
+
+  ![Server Schema](/docs/database_shema_server.png)
 </details>
 
 
@@ -26,5 +27,6 @@ Server side uses SQLite as a database to store info about users, messages and fi
 Client cashes all info in the local database, which is just little simplified version of the server one.
 <details>
   <summary>DB schema for client side:</summary>
-  ![Server Schema](docs/database_shema_client.png)
+
+  ![Server Schema](/docs/database_shema_client.png)
 </details>
