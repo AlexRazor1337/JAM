@@ -15,6 +15,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/socket.h>
+
+#include <arpa/inet.h>
+
+
 #define SERVER_PORT 8000
 extern int errno;
 typedef struct pthread_arg_t {
