@@ -2,6 +2,7 @@
 #define JAM_HEADER_H
 
 #include "../../libs/sqlite/sqlite3.h"
+#include "../../libs/list/list.h"
 
 #include <stdbool.h>
 #include <sys/types.h>
@@ -27,6 +28,11 @@ typedef struct pthread_arg_t {
     /* TODO: Put arguments passed to threads here. See lines 116 and 139. */
     int id;
 } pthread_arg_t;
+
+typedef struct connection_s {
+    int fd;
+    int id;
+} connection_t;
 
 /* Thread routine to serve connection to client. */
 void *pthread_routine(void *arg);

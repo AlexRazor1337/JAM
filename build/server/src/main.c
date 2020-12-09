@@ -21,10 +21,10 @@ typedef struct s_connection {
 
 
 t_connection connections[10];
-int tcp_fd, udp_fd;
+int tcp_fd;
+t_list *connections_list = NULL;
 
 int main() {
-    
     sqlite3 *db;
     const unsigned char* result;
 
@@ -69,17 +69,12 @@ int main() {
         fprintf(stderr, "Error creating TCP socket: %s\n", strerror(errno));
         exit(EXIT_FAILURE);
     }
-
-    if ((udp_fd = socket(AF_INET, SOCK_DGRAM, 0)) == -1 ) { 
-        fprintf(stderr, "Error creating socket: UDP %s\n", strerror(errno));
-        exit(EXIT_FAILURE); 
-    } 
-
+    int option = 1;
+    setsockopt(tcp_fd, SOL_SOCKET, SO_REUSEADDR, &option, sizeof(option));
     /* TCP Bind address to socket. */
-    if (bind(tcp_fd, (struct sockaddr *)&address, sizeof address) == -1 || bind(udp_fd, (struct sockaddr *)&address, sizeof address)) {
+    if (bind(tcp_fd, (struct sockaddr *)&address, sizeof address) == -1) {
         fprintf(stderr, "Error binding sockets: %s\n", strerror(errno));
         close(tcp_fd);
-        close(udp_fd);
         exit(EXIT_FAILURE);
     }
 
@@ -116,69 +111,58 @@ int main() {
     #pragma endregion sockets_init
 
     int connections_count = 0;
-    fd_set rset;
-    int max_fdp = max(tcp_fd, udp_fd) + 1;
+
     while (true) {
-        FD_SET(tcp_fd, &rset);
-        FD_SET(udp_fd, &rset);
-
-        select(max_fdp, &rset, NULL, NULL, NULL);
-
         pthread_arg = (pthread_arg_t *) malloc(sizeof *pthread_arg);
         if (!pthread_arg) {
             perror("malloc");
             continue;
         }
-        if (FD_ISSET(tcp_fd, &rset)) {
-            /* Accept connection to client. */
-            client_address_len = sizeof pthread_arg->client_address;
-            new_socket_fd = accept(tcp_fd, (struct sockaddr *)&pthread_arg->client_address, &client_address_len);
-            if (new_socket_fd == -1) {
-                perror("accept");
-                free(pthread_arg);
-                continue;
-            }
-            printf("Accepted connection\n");
-            /* Initialise pthread argument. */
-            pthread_arg->new_socket_fd = new_socket_fd;
-            pthread_arg->id = 0;// ++connections_count;
-            /* TODO: Initialise arguments passed to threads here. See lines 22 and
-            * 139.
-            */
+        /* Accept connection to client. */
+        client_address_len = sizeof pthread_arg->client_address;
+        new_socket_fd = accept(tcp_fd, (struct sockaddr *)&pthread_arg->client_address, &client_address_len);
+        if (new_socket_fd == -1) {
+            //perror("accept");
+            free(pthread_arg);
+            continue;
+        }
+        printf("Accepted connection\n");
+        t_list *carret = connections_list;
+        while (carret) {
+            if (carret->data) {
+                connection_t *con = carret->data;
+                printf("FD: %d ID: %d", con->fd, con->id);
 
-            /* Create thread to serve connection to client. */
-            if (pthread_create(&pthread, &pthread_attr, pthread_routine, (void *)pthread_arg) != 0) {
-                perror("pthread_create");
-                free(pthread_arg);
-                continue;
             }
-        } else if(FD_ISSET(udp_fd, &rset)) {
+            
+            carret = carret->next;
+        }
+        //fcntl(tcp_fd, F_SETFL, O_NONBLOCK); /* Change the socket into non-blocking state	*/
+        fcntl(new_socket_fd, F_SETFL, O_NONBLOCK);
+        /* Initialise pthread argument. */
+        pthread_arg->new_socket_fd = new_socket_fd;
+        pthread_arg->id = ++connections_count;
         
+        connection_t *new_connection = malloc(sizeof(connection_t));
+        new_connection->fd = new_socket_fd;
+        mx_push_back(&connections_list, new_connection);
+        /* TODO: Initialise arguments passed to threads here. See lines 22 and
+        * 139.
+        */
 
-            char buf[512];
-            if(recvfrom(udp_fd, buf, 512, 0, (struct sockaddr *)&pthread_arg->client_address, &client_address_len) == -1)
-                perror("recvfrom()");
-
-            printf("Recieved packet from %s: %d\nData: %s\n", inet_ntoa(pthread_arg->client_address.sin_addr), ntohs(address.sin_port), buf);
-            if (buf[0] == '1') {
-                printf("Client with id %s sent hello, registering\n", &buf[1]);
-                connections[connections_count].id = atoi(&buf[1]);
-                strcpy(connections[connections_count].address, inet_ntoa(pthread_arg->client_address.sin_addr));
-                ++connections_count;
-            }
-
+        /* Create thread to serve connection to client. */
+        if (pthread_create(&pthread, &pthread_attr, pthread_routine, (void *)pthread_arg) != 0) {
+            perror("pthread_create");
+            free(pthread_arg);
+            continue;
         }
     }
-
-
-
     /* close(tcp_fd);
      * TODO: If you really want to close the socket, you would do it in
      * signal_handler(), meaning tcp_fd would need to be a global variable.
      */
 
     close(tcp_fd);
-    close(udp_fd);
     sqlite3_close(db);
     return 0;
 }
@@ -187,38 +171,52 @@ int main() {
 void *pthread_routine(void *arg) {
     pthread_arg_t *pthread_arg = (pthread_arg_t *)arg;
     int new_socket_fd = pthread_arg->new_socket_fd;
-    struct sockaddr_in client_address = pthread_arg->client_address;
-    /* TODO: Get arguments passed to threads here. See lines 22 and 116. */
-    (void) client_address;
+
     free(arg);
-    write(new_socket_fd, "0", 2);
-    printf("here");
+    
+    printf("here %d \n", new_socket_fd);
+    
     char buf[256];
-    int rc = 0;
-    if ((rc = read(new_socket_fd, &buf, 256)) > 0) {
-        printf("Got from client: %s", buf);
-    }
-
-
-    for (int i = 0; i < 10; i++) {
-        if (connections[i].id == atoi(&buf[0])) {
-            printf("%s buf TO %s \n", buf, connections[i].address);
-            struct hostent *server_host = gethostbyname(connections[i].address);
-            struct sockaddr_in server_address;
-            /* Initialise IPv4 server address with server host. */
-            memset(&server_address, 0, sizeof server_address);
-            server_address.sin_family = AF_INET;
-            server_address.sin_port = htons(8000);
-
-            memcpy(&server_address.sin_addr.s_addr, server_host->h_addr, server_host->h_length);
-
-            int rc = sendto(udp_fd, buf, strlen(buf), 0, (const struct sockaddr*) &server_address, sizeof(server_address));
-            printf("rc %d", rc);
-            if (rc < 0) {
-                perror("rc ");
-            }
+    while(true) {
+        
+        memset(buf, 0, 256);
+		int n = recv(new_socket_fd, buf, sizeof(buf), 0);
+        if (n < 1){ 
+            continue;
+            // perror("recv - non blocking \n");
+            //     printf("Round %d, and the data read size is: n=%d \n", new_socket_fd,n);
         }
-    }
+        else{  
+            buf[n] = '\0';
+            printf("The string is: %s \n",buf);
+            if (buf[0] == '1') {
+                t_list *carret = connections_list;
+                while (carret) {
+                    connection_t *con = carret->data;
+                    if (carret->data && con->fd == new_socket_fd) {
+                        buf[0] = '0';
+                        con->id = atoi(buf);
+                        break;
+                    }
+                    carret = carret->next;
+                }
+            } else if (buf[0] == '2') { 
+                t_list *carret = connections_list;
+                while (carret) {
+                    connection_t *con = carret->data;
+                    printf("%d == %d \n", con->id, buf[1] - '0');
+                    if (carret->data && con->id == buf[1] - '0') {
+                        int rc = write(con->fd, buf, sizeof(buf));
+                        printf("rc %d\n", rc);
+                        break;
+                    }
+                    carret = carret->next;
+                }
+            }
+            // if (send(new_fd, "Hello, world!\n", 14, 0) == -1)
+            //     perror("send");
+        }
+	}
     /* TODO: Put client interaction code here. For example, use
      * write(new_socket_fd,,) and read(new_socket_fd,,) to send and receive
      * messages with the client.
