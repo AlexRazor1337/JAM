@@ -3,6 +3,7 @@
 
 #include "../../libs/sqlite/sqlite3.h"
 #include "../../libs/list/list.h"
+#include "../../libs/dyad/dyad.h"
 
 #include <stdbool.h>
 #include <sys/types.h>
@@ -18,7 +19,7 @@
 #include <sys/socket.h>
 #include <netdb.h>
 #include <arpa/inet.h>
-
+#include <stdint.h>
 
 #define SERVER_PORT 8000
 extern int errno;
@@ -48,7 +49,7 @@ int db_exec(sqlite3 *db, char* querry, const unsigned char** result);
 
 int codepoint_len(const uint32_t cp); /* len of associated utf-8 char */
 int utf8_len(const char ch);          /* len of utf-8 encoded char */
- 
+
 char *to_utf8(const uint32_t cp);
 uint32_t to_cp(const char chr[4]);
 #endif //JAM_HEADER_H
