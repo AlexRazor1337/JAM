@@ -14,21 +14,16 @@ void register_user(char *name, char *login, char *password) {
     db_exec(db, str, NULL);
     free(str);
 }
-//1234
+
 void postAuthData(dyad_Event *e) {
-    printf("%s\n", e->data);
+    printf("PAD: %s\n", e->data);
     int *id = malloc(sizeof(int));
     char *reciever_id = malloc(16);
     char *text = malloc(196);
     sscanf(e->data, "/@%d/msg|%[^|]|%s", id, reciever_id, text);
-    printf("here\n");
+
     t_connection *reciever = find_node_uid(atoi(reciever_id), connections);
-    printf("here2\n");
-    if (!reciever) return;
-    if (reciever->stream) printf("rec\n");
-    if (id) printf("id\n");
-    if (text) printf("te: %s\n", text);
-    //if (find_node(atoi(id), connections)->uid) printf("uid\n");
+
     dyad_writef(reciever->stream, "/@%d/msg|%s", find_node_uid(*id, connections)->uid, text);
     free(id);
     free(reciever_id);
@@ -76,15 +71,14 @@ static void firstConnectionEvent(dyad_Event *e) {
 
 
 int main() {
-#if defined(__linux__)
-    setvbuf(stdout, NULL, _IONBF, 0);
-#endif
-
+    #if defined(__linux__)
+        setvbuf(stdout, NULL, _IONBF, 0);
+    #endif
     char* result;
 
     printf("INITIALIZING JAM SERVER\n");
     printf("INITIALIZING SQLITE: ");
-#pragma region db_init
+    #pragma region db_init
     if (!is_dir_exists("server_data"))
         mkdir("server_data", 0755);
 
@@ -96,12 +90,12 @@ int main() {
         exit(EXIT_FAILURE);
     }
     db_prepare();
-#pragma endregion db_init
+    #pragma endregion db_init
 
     db_exec(db, "SELECT SQLITE_VERSION()", &result);
     printf("VER. %s\n", result);
 
-#pragma region sockets_init
+    #pragma region sockets_init
     dyad_init();
     printf("INITIALIZING DYAD: VER. %s\n", dyad_getVersion());
 
@@ -110,8 +104,9 @@ int main() {
     dyad_listen(serv, 8000);
 
     signal(SIGINT, signal_handler);
-#pragma endregion sockets_init
+    #pragma endregion sockets_init
 
+    // TODO Remove when DB is consistent
     register_user("Pomogite", "mem", "testpas");
     register_user("Lel", "mem2", "testpas");
     while (dyad_getStreamCount() > 0) {

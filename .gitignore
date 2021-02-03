@@ -54,6 +54,6 @@ dkms.conf
 
 server_data/
 client
-server
 .vscode/settings.json
 .DS_Store
+server

@@ -13,11 +13,16 @@
 #include <sys/socket.h>
 #include <unistd.h>
 #include <fcntl.h>
-#define SERVER_NAME_LEN_MAX 255
 #include "../../libs/dyad/dyad.h"
+
+#define SERVER_NAME_LEN_MAX 255
+#define SERVER_PORT 8000
+#define SERVER_ADRESS "10.11.7.9"
 
 enum State {UNAUTH, AUTH};
 typedef struct s_client {
+    char *login;
+    char *password;
     unsigned long int uid;
     enum State state;
 }              t_client;
