@@ -21,10 +21,12 @@ void postAuthData(dyad_Event *e) {
     char *reciever_id = malloc(16);
     char *text = malloc(196);
     sscanf(e->data, "/@%d/msg|%[^|]|%s", id, reciever_id, text);
+    if (id && reciever_id && text) { // && atoi(reciever_id) != 0
+        t_connection *reciever = find_node_uid(atoi(reciever_id), connections);
+        if (reciever)
+            dyad_writef(reciever->stream, "/@%d/msg|%s", find_node_uid(*id, connections)->uid, text);
+    }
 
-    t_connection *reciever = find_node_uid(atoi(reciever_id), connections);
-
-    dyad_writef(reciever->stream, "/@%d/msg|%s", find_node_uid(*id, connections)->uid, text);
     free(id);
     free(reciever_id);
     free(text);
@@ -48,15 +50,16 @@ void getAuthDetails(dyad_Event *e) {
         client->uid = atoi(result);
         printf("Client Authorized:\n");
         dyad_removeListener(client->stream, DYAD_EVENT_DATA, getAuthDetails, NULL);
-        dyad_addListener(client->stream, DYAD_EVENT_DATA, postAuthData, NULL);
+
         dyad_writef(client->stream, "/@/auth_answer|%s", result); // Sends uid to client
+        dyad_addListener(client->stream, DYAD_EVENT_DATA, postAuthData, NULL);
     }
+    free(result);
     free(id);
     free(login);
     free(password);
     free(str);
 }
-
 
 //TODO Write create_connection()
 static void firstConnectionEvent(dyad_Event *e) {
@@ -68,7 +71,6 @@ static void firstConnectionEvent(dyad_Event *e) {
     dyad_addListener(e->remote, DYAD_EVENT_DATA, getAuthDetails, NULL);
     dyad_writef(e->remote, "%d", new_connection->id);
 }
-
 
 int main() {
     #if defined(__linux__)
@@ -109,8 +111,11 @@ int main() {
     // TODO Remove when DB is consistent
     register_user("Pomogite", "mem", "testpas");
     register_user("Lel", "mem2", "testpas");
+    struct rusage r_usage;
+
     while (dyad_getStreamCount() > 0) {
         dyad_update();
+        check_disconnected_client();
     }
 
     dyad_shutdown();

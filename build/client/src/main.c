@@ -11,6 +11,7 @@ void onDataPostAuth(dyad_Event *e) { // Anything, when user is AUTH'ed
 }
 
 void onDataWaitAuthAnswer(dyad_Event *e) { // get real user id
+    printf("Real ID: %s\n", e->data);
     char *id = malloc(16);
     sscanf(e->data, "/@/auth_answer|%s", id);
     if (id) {
@@ -24,10 +25,14 @@ void onDataWaitAuthAnswer(dyad_Event *e) { // get real user id
 }
 
 void onConnectedData(dyad_Event *e) { // Gets temporal user id
+    printf("Temporal ID: %s\n", e->data);
     int id = atoi(e->data);
-    dyad_writef(server_stream, "/@%d/authorize|%s|%s", id, client.login, client.password);
+    printf("ASK FOR AUTH\n");
+
     dyad_removeListener(server_stream, DYAD_EVENT_DATA, onConnectedData,      NULL);
     dyad_addListener(server_stream,    DYAD_EVENT_DATA, onDataWaitAuthAnswer, NULL);
+
+    dyad_writef(server_stream, "/@%d/authorize|%s|%s", id, client.login, client.password);
 }
 
 static void onInitialConnect(dyad_Event *e) {printf("%s\n", e->msg);}
