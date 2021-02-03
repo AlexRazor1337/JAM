@@ -23,28 +23,25 @@
 
 #define SERVER_PORT 8000
 extern int errno;
-typedef struct pthread_arg_t {
-    int new_socket_fd;
-    struct sockaddr_in client_address;
-    /* TODO: Put arguments passed to threads here. See lines 116 and 139. */
-    int id;
-} pthread_arg_t;
 
-typedef struct connection_s {
-    int fd;
-    int id;
-} connection_t;
 
-/* Thread routine to serve connection to client. */
-void *pthread_routine(void *arg);
+typedef struct s_connection {
+    int id;
+    int uid;
+    void (*dataListener)(dyad_Event *);
+    dyad_Stream *stream;
+}              t_connection;
+
 
 /* Signal handler to handle SIGTERM and SIGINT signals. */
 void signal_handler(int signal_number);
 
-
+int generate_unique_id(t_list *connections);
+t_connection *find_node(int id, t_list *connections);
+t_connection *find_node_uid(int uid, t_list *connections);
 bool is_dir_exists(char* name);
 
-int db_exec(sqlite3 *db, char* querry, const unsigned char** result);
+int db_exec(sqlite3 *db, char* querry, char** result);
 
 
 int codepoint_len(const uint32_t cp); /* len of associated utf-8 char */
