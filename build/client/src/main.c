@@ -37,8 +37,7 @@ void onConnectedData(dyad_Event *e) { // Gets temporal user id
 
 static void onInitialConnect(dyad_Event *e) {printf("%s\n", e->msg);}
 
-void onDisconnect(dyad_Event *e) {
-    (void) e;
+void onDisconnect() {
     sleep(3);
     connectToServer();
 }
@@ -47,7 +46,6 @@ void connectToServer() {
     server_stream = dyad_newStream();
     dyad_addListener(server_stream, DYAD_EVENT_CONNECT, onInitialConnect, NULL);
     dyad_addListener(server_stream, DYAD_EVENT_DATA,    onConnectedData,  NULL);
-    dyad_addListener(server_stream, DYAD_EVENT_CLOSE,    onDisconnect,  NULL);
     dyad_connect(server_stream, SERVER_ADRESS, SERVER_PORT); //TODO Check connection
 }
 
@@ -80,8 +78,10 @@ int main() {
                     send_message(id, text);
                 }
             }
-            free(action);
+            free(action); // TODO remove console shit
             action = NULL;
+
+            if (dyad_getState(server_stream) == DYAD_STATE_CLOSED) onDisconnect();
         }
         dyad_update();
     }
