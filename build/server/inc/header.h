@@ -20,6 +20,7 @@
 #include <netdb.h>
 #include <arpa/inet.h>
 #include <stdint.h>
+#include <time.h>
 #include <sys/resource.h> //TODO REmove
 #define SERVER_PORT 8000
 extern int errno;
@@ -43,7 +44,7 @@ bool is_dir_exists(char* name);
 
 int db_exec(sqlite3 *db, char* querry, char** result);
 
-
+char *mx_itoa(int n);
 int codepoint_len(const uint32_t cp); /* len of associated utf-8 char */
 int utf8_len(const char ch);          /* len of utf-8 encoded char */
 

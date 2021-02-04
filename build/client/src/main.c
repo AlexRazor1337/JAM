@@ -69,7 +69,7 @@ int main() {
     char *buffer = malloc(256);
 
     while (dyad_getStreamCount() > 0) { // main loop
-        if (client.state == AUTH && false) {
+        if (client.state == AUTH) {
             action = malloc(32);
             printf("Select action: '@write id text'");
             getline(&buffer, &bufsize, stdin);

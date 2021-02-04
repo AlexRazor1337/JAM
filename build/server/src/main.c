@@ -23,8 +23,10 @@ void postAuthData(dyad_Event *e) {
     sscanf(e->data, "/@%d/msg|%[^|]|%s", id, reciever_id, text);
     if (id && reciever_id && text) { // && atoi(reciever_id) != 0
         t_connection *reciever = find_node_uid(atoi(reciever_id), connections);
-        //char *str = malloc(196);
-        //sprintf(str, "INSERT INTO messages(id_from, id_to, text, timestamp, attachment) VALUES('%s', '%s', '%s');", name, login, password);
+        printf("bef\n");
+        //char *str = malloc(256);
+        //sprintf(str, "INSERT INTO messages(id_from, id_to, text, timestamp) VALUES('%d', '%s', '%s', '%ld');", *id, reciever_id, text, time(NULL));
+        printf("aft\n");
         if (reciever) dyad_writef(reciever->stream, "/@%d/msg|%s", find_node_uid(*id, connections)->uid, text);
     }
 
