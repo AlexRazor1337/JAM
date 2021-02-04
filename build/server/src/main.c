@@ -4,8 +4,9 @@ t_list *connections;
 
 void db_prepare() {
     db_exec(db, "CREATE TABLE IF NOT EXISTS users (id integer PRIMARY KEY AUTOINCREMENT, name varchar, login varchar UNIQUE, password varchar, last_visit datetime);", NULL);
-    db_exec(db, "CREATE TABLE IF NOT EXISTS messages (id_from integer, id_to integer, text text, timestamp datetime, attachment integer);", NULL);
-    db_exec(db, "CREATE TABLE IF NOT EXISTS files (id integer PRIMARY KEY AUTOINCREMENT, hash varchar, name varchar, extension varchar);", NULL);
+    db_exec(db, "CREATE TABLE IF NOT EXISTS messages (id integer PRIMARY KEY AUTOINCREMENT, id_from integer, chat_id integer, text text, timestamp datetime, attachment integer);", NULL);
+    db_exec(db, "CREATE TABLE IF NOT EXISTS participants (id integer PRIMARY KEY AUTOINCREMENT, uid integer, chat_id integer);", NULL);
+    db_exec(db, "CREATE TABLE IF NOT EXISTS chats (id integer PRIMARY KEY AUTOINCREMENT, name varchar, is_group BOOLEAN);", NULL);
 }
 
 void register_user(char *name, char *login, char *password) {
@@ -18,20 +19,41 @@ void register_user(char *name, char *login, char *password) {
 void postAuthData(dyad_Event *e) {
     printf("PAD: %s\n", e->data);
     int *id = malloc(sizeof(int));
-    char *reciever_id = malloc(16);
+    char *chat_id = malloc(16);
     char *text = malloc(196);
-    sscanf(e->data, "/@%d/msg|%[^|]|%s", id, reciever_id, text);
-    if (id && reciever_id && text) { // && atoi(reciever_id) != 0
-        t_connection *reciever = find_node_uid(atoi(reciever_id), connections);
-        printf("bef\n");
-        //char *str = malloc(256);
-        //sprintf(str, "INSERT INTO messages(id_from, id_to, text, timestamp) VALUES('%d', '%s', '%s', '%ld');", *id, reciever_id, text, time(NULL));
-        printf("aft\n");
-        if (reciever) dyad_writef(reciever->stream, "/@%d/msg|%s", find_node_uid(*id, connections)->uid, text);
+    sscanf(e->data, "/@%d/msg|%[^|]|%s", id, chat_id, text);
+    if (id && chat_id && text) { // && atoi(chat_id) != 0
+        //t_connection *reciever = find_node_uid(atoi(chat_id), connections);
+        char *str = malloc(256);
+        sprintf(str, "INSERT INTO messages(id_from, chat_id, text, timestamp) VALUES('%d', '%s', '%s', '%ld');", *id, chat_id, text, time(NULL));
+        db_exec(db, str, NULL);
+        free(str);
+        char* result;
+        db_exec(db, "SELECT id FROM participants WHERE chat_id='1'", &result);
+        //TODO get users
+        char** tmp = NULL;
+        int num_rows, num_cols;
+        char* zErrMsg = NULL;
+        int rc = sqlite3_get_table(db, statement, &tmp, &num_rows, &num_cols, &zErrMsg);
+        if( rc != SQLITE_OK ) {
+        fprintf(stderr, "SQL error: %s\n", zErrMsg);
+        sqlite3_free(zErrMsg);
+        exit(EXIT_FAILURE);
+        }
+        char** result = (char **)malloc(sizeof(char *)*(num_cols*num_rows));
+        for(int i = 0; i < num_cols*num_rows; i++){
+            //if(i%num_cols == 0) printf("%s\n", "");
+            //printf("%s   ", result[i]);
+            result[i] = strdup(tmp[i+num_cols]);
+            //printf("%s   ", result[i]);
+        }
+        //printf("%s\n", "");
+        sqlite3_free_table(tmp);
+        //if (reciever) dyad_writef(reciever->stream, "/@%d/msg|%s", find_node_uid(*id, connections)->uid, text);
     }
 
     free(id);
-    free(reciever_id);
+    free(chat_id);
     free(text);
 }
 
@@ -128,6 +150,15 @@ int main() {
     // TODO Remove when DB is consistent
     register_user("Pomogite", "mem", "testpas");
     register_user("Lel", "mem2", "testpas");
+    char *str = malloc(196);
+    sprintf(str, "INSERT INTO chats(is_group) VALUES('%d');", false);
+    db_exec(db, str, NULL);
+    free(str);
+    str = NULL;
+
+    db_exec(db,  "INSERT INTO participants(uid, chat_id) VALUES('1', '1');", NULL);
+    db_exec(db,  "INSERT INTO participants(uid, chat_id) VALUES('2', '1');", NULL);
+
 
     while (dyad_getStreamCount() > 0) {
         dyad_update();
