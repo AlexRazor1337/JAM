@@ -28,6 +28,8 @@ typedef struct s_client {
 }              t_client;
 
 
+void connectToServer();
+
 int codepoint_len(const uint32_t cp); /* len of associated utf-8 char */
 int utf8_len(const char ch);          /* len of utf-8 encoded char */
 

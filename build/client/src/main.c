@@ -37,12 +37,23 @@ void onConnectedData(dyad_Event *e) { // Gets temporal user id
 
 static void onInitialConnect(dyad_Event *e) {printf("%s\n", e->msg);}
 
-int main() {
-    dyad_init();
+void onDisconnect(dyad_Event *e) {
+    (void) e;
+    sleep(3);
+    connectToServer();
+}
+
+void connectToServer() {
     server_stream = dyad_newStream();
     dyad_addListener(server_stream, DYAD_EVENT_CONNECT, onInitialConnect, NULL);
     dyad_addListener(server_stream, DYAD_EVENT_DATA,    onConnectedData,  NULL);
+    dyad_addListener(server_stream, DYAD_EVENT_CLOSE,    onDisconnect,  NULL);
     dyad_connect(server_stream, SERVER_ADRESS, SERVER_PORT); //TODO Check connection
+}
+
+int main() {
+    dyad_init();
+    connectToServer();
 
     client.login = malloc(32);
     client.password = "testpas";
@@ -58,7 +69,7 @@ int main() {
     char *buffer = malloc(256);
 
     while (dyad_getStreamCount() > 0) { // main loop
-        if (client.state == AUTH) {
+        if (client.state == AUTH && false) {
             action = malloc(32);
             printf("Select action: '@write id text'");
             getline(&buffer, &bufsize, stdin);

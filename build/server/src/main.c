@@ -23,8 +23,9 @@ void postAuthData(dyad_Event *e) {
     sscanf(e->data, "/@%d/msg|%[^|]|%s", id, reciever_id, text);
     if (id && reciever_id && text) { // && atoi(reciever_id) != 0
         t_connection *reciever = find_node_uid(atoi(reciever_id), connections);
-        if (reciever)
-            dyad_writef(reciever->stream, "/@%d/msg|%s", find_node_uid(*id, connections)->uid, text);
+        //char *str = malloc(196);
+        //sprintf(str, "INSERT INTO messages(id_from, id_to, text, timestamp, attachment) VALUES('%s', '%s', '%s');", name, login, password);
+        if (reciever) dyad_writef(reciever->stream, "/@%d/msg|%s", find_node_uid(*id, connections)->uid, text);
     }
 
     free(id);
@@ -72,6 +73,20 @@ static void firstConnectionEvent(dyad_Event *e) {
     dyad_writef(e->remote, "%d", new_connection->id);
 }
 
+void check_disconnected_client() {
+    t_list *carret = connections;
+    int index = 0;
+    while (carret) {
+        t_connection *con = carret->data;
+        if (dyad_getState(con->stream) == DYAD_STATE_CLOSED) {
+            free(con);
+            con = NULL;
+            mx_pop_index(&connections, index);
+        }
+        carret = carret->next;
+    }
+}
+
 int main() {
     #if defined(__linux__)
         setvbuf(stdout, NULL, _IONBF, 0);
@@ -111,7 +126,6 @@ int main() {
     // TODO Remove when DB is consistent
     register_user("Pomogite", "mem", "testpas");
     register_user("Lel", "mem2", "testpas");
-    struct rusage r_usage;
 
     while (dyad_getStreamCount() > 0) {
         dyad_update();
