@@ -24,26 +24,27 @@ void postAuthData(dyad_Event *e) {
     sscanf(e->data, "/@%d/msg|%[^|]|%s", id, chat_id, text);
     if (id && chat_id && text) { // && atoi(chat_id) != 0
         //t_connection *reciever = find_node_uid(atoi(chat_id), connections);
-        char *str = malloc(256);
+        char *str = malloc(256); // TODO make it bigger depending on message size
         sprintf(str, "INSERT INTO messages(id_from, chat_id, text, timestamp) VALUES('%d', '%s', '%s', '%ld');", *id, chat_id, text, time(NULL));
         db_exec(db, str, NULL);
         free(str);
-        char* result;
-        db_exec(db, "SELECT id FROM participants WHERE chat_id='1'", &result);
+
         //TODO get users
         char** result_table = NULL;
         int num_rows, num_cols;
-
-        int rc = sqlite3_get_table(db, statement, &tmp, &num_rows, &num_cols, NULL);
+        char *querry = malloc(96);
+        sprintf(querry, "SELECT id FROM participants WHERE chat_id='%s'", chat_id);
+        sqlite3_get_table(db, querry, &result_table, &num_rows, &num_cols, NULL);
         char** result = (char **)malloc(sizeof(char *)*(num_cols*num_rows));
-        for(int i = 0; i < num_cols*num_rows; i++){
-            //if(i%num_cols == 0) printf("%s\n", "");
-            //printf("%s   ", result[i]);
-            result[i] = strdup(tmp[i+num_cols]);
-            //printf("%s   ", result[i]);
+        for (int i = 0; i < num_cols*num_rows; i++){
+            result[i] = strdup(result_table[i+num_cols]);
+            t_connection *reciever = find_node_uid(atoi(result[i]), connections);
+            if (reciever) dyad_writef(reciever->stream, "/@%d/msg|%s", find_node_uid(*id, connections)->uid, text);
         }
         //printf("%s\n", "");
-        sqlite3_free_table(tmp);
+        sqlite3_free_table(result_table);
+        free(querry);
+        free(result);
         //if (reciever) dyad_writef(reciever->stream, "/@%d/msg|%s", find_node_uid(*id, connections)->uid, text);
     }
 
@@ -145,6 +146,8 @@ int main() {
     // TODO Remove when DB is consistent
     register_user("Pomogite", "mem", "testpas");
     register_user("Lel", "mem2", "testpas");
+    register_user("Lel", "mem3", "testpas");
+    register_user("Lel", "mem4", "testpas");
     char *str = malloc(196);
     sprintf(str, "INSERT INTO chats(is_group) VALUES('%d');", false);
     db_exec(db, str, NULL);
