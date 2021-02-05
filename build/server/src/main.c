@@ -16,18 +16,17 @@ void register_user(char *name, char *login, char *password) {
     free(str);
 }
 
-void postAuthData(dyad_Event *e) {
-    printf("PAD: %s\n", e->data);
+void handleMsg(char *data) {
     int *id = malloc(sizeof(int));
     char *chat_id = malloc(16);
-    char *text = malloc(196);
-    sscanf(e->data, "/@%d/msg|%[^|]|%s", id, chat_id, text);
+    char *text = malloc(strlen(data));
+    sscanf(data, "/@%d/msg|%[^|]|%[^\r]", id, chat_id, text);
     if (id && chat_id && text) { // && atoi(chat_id) != 0
-        //t_connection *reciever = find_node_uid(atoi(chat_id), connections);
-        char *str = malloc(256); // TODO make it bigger depending on message size
+        char *str = malloc(strlen(data) + 256); // TODO make it bigger depending on message size
         sprintf(str, "INSERT INTO messages(id_from, chat_id, text, timestamp) VALUES('%d', '%s', '%s', '%ld');", *id, chat_id, text, time(NULL));
         db_exec(db, str, NULL);
         free(str);
+        str = NULL;
 
         //TODO get users
         char** result_table = NULL;
@@ -35,22 +34,31 @@ void postAuthData(dyad_Event *e) {
         char *querry = malloc(96);
         sprintf(querry, "SELECT id FROM participants WHERE chat_id='%s'", chat_id);
         sqlite3_get_table(db, querry, &result_table, &num_rows, &num_cols, NULL);
-        char** result = (char **)malloc(sizeof(char *)*(num_cols*num_rows));
+        char **result = (char **)malloc(sizeof(char *)*(num_cols*num_rows));
         for (int i = 0; i < num_cols*num_rows; i++){
-            result[i] = strdup(result_table[i+num_cols]);
+            result[i] = strdup(result_table[i + num_cols]);
             t_connection *reciever = find_node_uid(atoi(result[i]), connections);
-            if (reciever) dyad_writef(reciever->stream, "/@%d/msg|%s", find_node_uid(*id, connections)->uid, text);
+            if (reciever) dyad_writef(reciever->stream, "/@%d/msg|%b", find_node_uid(*id, connections)->uid, text, strlen(text));
         }
-        //printf("%s\n", "");
+
         sqlite3_free_table(result_table);
         free(querry);
         free(result);
-        //if (reciever) dyad_writef(reciever->stream, "/@%d/msg|%s", find_node_uid(*id, connections)->uid, text);
     }
 
     free(id);
     free(chat_id);
     free(text);
+}
+
+void postAuthData(dyad_Event *e) {
+    printf("PAD: %s\n", e->data);
+    char *action = malloc(32);
+    sscanf(e->data, "/@%*d/%[^|]|", action);
+    if (strcmp(action, "msg") == 0) {
+        handleMsg(action);
+    }
+    free(action);
 }
 
 void getAuthDetails(dyad_Event *e) {

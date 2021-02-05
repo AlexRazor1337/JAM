@@ -30,10 +30,10 @@ t_connection *find_node(int id, t_list *connections) {
 
 t_connection *find_node_uid(int uid, t_list *connections) {
     t_list *carret = connections;
-    printf("GET UID: %d\n", uid);
+    //printf("GET UID: %d\n", uid);
     while (carret) {
         t_connection *data = carret->data;
-        printf("UID: %d %d\n", uid, data->uid);
+        //printf("UID: %d %d\n", uid, data->uid);
         if (data->uid == uid) return data;
         carret = carret->next;
     }

@@ -3,7 +3,8 @@ static t_client client = {0};
 dyad_Stream *server_stream;
 
 void send_message(char *id, char *text) {
-    dyad_writef(server_stream, "/@%d/msg|%s|%s", client.uid, id, text);
+    printf("text: %s\n", text);
+    dyad_writef(server_stream, "/@%d/msg|%s|%b", client.uid, id, text, strlen(text));
 }
 
 void onDataPostAuth(dyad_Event *e) { // Anything, when user is AUTH'ed
@@ -38,6 +39,7 @@ void onConnectedData(dyad_Event *e) { // Gets temporal user id
 static void onInitialConnect(dyad_Event *e) {printf("%s\n", e->msg);}
 
 void onDisconnect() {
+    client.state = UNAUTH;
     sleep(3);
     connectToServer();
 }
@@ -71,7 +73,7 @@ int main() {
             action = malloc(32);
             printf("Select action: '@write id text'");
             getline(&buffer, &bufsize, stdin);
-            sscanf(buffer, "@%s %s %s", action, id, text);
+            sscanf(buffer, "@%s %s %[^\f]", action, id, text);
 
             if (action) {
                 if (strncmp(action, "write", 5) == 0 && id && text) {
