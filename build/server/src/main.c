@@ -156,7 +156,8 @@ int main() {
 
     db_exec(db,  "INSERT INTO participants(uid, chat_id) VALUES('1', '1');", NULL);
     db_exec(db,  "INSERT INTO participants(uid, chat_id) VALUES('2', '1');", NULL);
-
+    db_exec(db,  "INSERT INTO participants(uid, chat_id) VALUES('3', '1');", NULL);
+    db_exec(db,  "INSERT INTO participants(uid, chat_id) VALUES('4', '1');", NULL);
 
     while (dyad_getStreamCount() > 0) {
         dyad_update();
