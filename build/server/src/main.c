@@ -31,15 +31,10 @@ void postAuthData(dyad_Event *e) {
         char* result;
         db_exec(db, "SELECT id FROM participants WHERE chat_id='1'", &result);
         //TODO get users
-        char** tmp = NULL;
+        char** result_table = NULL;
         int num_rows, num_cols;
-        char* zErrMsg = NULL;
-        int rc = sqlite3_get_table(db, statement, &tmp, &num_rows, &num_cols, &zErrMsg);
-        if( rc != SQLITE_OK ) {
-        fprintf(stderr, "SQL error: %s\n", zErrMsg);
-        sqlite3_free(zErrMsg);
-        exit(EXIT_FAILURE);
-        }
+
+        int rc = sqlite3_get_table(db, statement, &tmp, &num_rows, &num_cols, NULL);
         char** result = (char **)malloc(sizeof(char *)*(num_cols*num_rows));
         for(int i = 0; i < num_cols*num_rows; i++){
             //if(i%num_cols == 0) printf("%s\n", "");
