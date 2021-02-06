@@ -16,6 +16,41 @@ void register_user(char *name, char *login, char *password) {
     free(str);
 }
 
+char *jsonlist_from_jsones(t_list *list, int bsize) {
+    char *final_json = malloc(bsize);
+    char *temporal = malloc(bsize);
+
+    char *cursor = temporal;
+    char *cursor_2 = final_json;
+    if (mx_list_size(list) == 1) {
+        sprintf(final_json, "[%s]", list->data);
+        free(temporal);
+        return final_json;
+    }
+
+    t_list *carret = list;
+    sprintf(final_json, "[%s", carret->data);
+    carret = carret->next;
+    while (carret) {
+        if (carret->next) {
+            sprintf(cursor, "%s,%s", cursor_2, carret->data);
+            free(cursor_2);
+            cursor_2 = malloc(bsize);
+            char *temp = cursor_2;
+            cursor_2 = cursor;
+            cursor = temp;
+        } else {
+            sprintf(cursor, "%s,%s]", cursor_2, carret->data);
+            free(cursor_2);
+            cursor_2 = NULL;
+        }
+        carret = carret->next;
+    }
+
+    printf("%s\n", cursor);
+    return cursor;
+}
+
 void handleMsg(char *data) {
     int *id = malloc(sizeof(int));
     char *chat_id = malloc(16);
@@ -39,6 +74,7 @@ void handleMsg(char *data) {
             result[i] = strdup(result_table[i + num_cols]);
             t_connection *reciever = find_node_uid(atoi(result[i]), connections);
             if (reciever) dyad_writef(reciever->stream, "/@%d/msg|%b", find_node_uid(*id, connections)->uid, text, strlen(text));
+            free(result[i]);
         }
 
         sqlite3_free_table(result_table);
@@ -50,13 +86,49 @@ void handleMsg(char *data) {
     free(chat_id);
     free(text);
 }
+//"SELECT id, name, login, last_visit FROM users WHERE id IN (SELECT uid FROM participants WHERE uid != '%d' AND chat_id IN (SELECT id FROM chats WHERE is_group = '0' AND id IN (SELECT DISTINCT chat_id FROM participants WHERE uid = '%d')));"
+void handleMsgUpdate(char *data) {
+    int *id = malloc(sizeof(int));
+    sscanf(data, "/@%d/getmsg", id);
+
+    // get chat ids
+    char** result_table = NULL;
+    int num_rows, num_cols;
+    char *querry = malloc(238 + 32);
+    sprintf(querry, "SELECT id, name, login, last_visit FROM users WHERE id IN (SELECT uid FROM participants WHERE uid != '%d' AND chat_id IN (SELECT id FROM chats WHERE is_group = '0' AND id IN (SELECT DISTINCT chat_id FROM participants WHERE uid = '%d')));", *id, *id);
+    sqlite3_get_table(db, querry, &result_table, &num_rows, &num_cols, NULL);
+    t_list *users_info = NULL;
+    int buf_size = 0;
+    for (int i = 0; i < num_rows; i++) {
+        char *temp = malloc(256);
+        sprintf(temp, "{\"id\":\"%s\",\"name\":\"%s\",\"login\":\"%s\"}\n", result_table[(i + 1) * num_cols + 0], result_table[(i + 1) * num_cols + 1], result_table[(i + 1) * num_cols + 2]);
+        buf_size += strlen(result_table[(i + 1) * num_cols + 0]) + strlen(result_table[(i + 1) * num_cols + 1]) + strlen(result_table[(i + 1) * num_cols + 2]);
+        mx_push_back(&users_info, strdup(temp));
+        free(temp);
+    }
+
+    char *json = jsonlist_from_jsones(users_info, buf_size * 10);
+    sqlite3_free_table(result_table);
+    result_table = NULL;
+    free(querry);
+    free(json);
+    //get chat info from ids 
+    //GET USERS AND GROUPS SEPARATELY
+    //(row + 1) * num_cols + col
+
+    // TODO Clear strings inside chat_ids
+    //if (reciever) dyad_writef(reciever->stream, "/updmsg|%b", text, strlen(text));
+}
 
 void postAuthData(dyad_Event *e) {
     printf("PAD: %s\n", e->data);
     char *action = malloc(32);
     sscanf(e->data, "/@%*d/%[^|]|", action);
+
     if (strcmp(action, "msg") == 0) {
-        handleMsg(action);
+        handleMsg(e->data);
+    } else if(strcmp(action, "getmsg") == 0) {
+        handleMsgUpdate(e->data);
     }
     free(action);
 }
@@ -166,7 +238,7 @@ int main() {
     db_exec(db,  "INSERT INTO participants(uid, chat_id) VALUES('2', '1');", NULL);
     db_exec(db,  "INSERT INTO participants(uid, chat_id) VALUES('3', '1');", NULL);
     db_exec(db,  "INSERT INTO participants(uid, chat_id) VALUES('4', '1');", NULL);
-
+    handleMsgUpdate("/@1/getmsg");
     while (dyad_getStreamCount() > 0) {
         dyad_update();
         check_disconnected_client();

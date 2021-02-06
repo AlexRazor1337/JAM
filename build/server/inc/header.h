@@ -4,6 +4,7 @@
 #include "../../libs/sqlite/sqlite3.h"
 #include "../../libs/list/list.h"
 #include "../../libs/dyad/dyad.h"
+#include "../../libs/frozen/frozen.h"
 
 #include <stdbool.h>
 #include <sys/types.h>
@@ -22,7 +23,9 @@
 #include <stdint.h>
 #include <time.h>
 #include <sys/resource.h> //TODO REmove
+
 #define SERVER_PORT 8000
+#define JSON_OP_SIZE 1024
 extern int errno;
 
 
