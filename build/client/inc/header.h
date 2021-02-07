@@ -1,7 +1,7 @@
 #if defined(__linux__)
-    #define  _GNU_SOURCE
-    #define  _POSIX_C_SOURCE 200809L
-    #define h_addr h_addr_list[0] /* for backward compatibility */
+#define  _GNU_SOURCE
+#define  _POSIX_C_SOURCE 200809L
+#define h_addr h_addr_list[0] /* for backward compatibility */
 #endif
 
 #include <netdb.h>
@@ -17,8 +17,7 @@
 
 #define SERVER_NAME_LEN_MAX 255
 #define SERVER_PORT 8000
-#define SERVER_ADRESS "10.11.7.9"
-
+#define SERVER_ADRESS "127.0.0.1" //"10.11.7.9"
 enum State {UNAUTH, AUTH};
 typedef struct s_client {
     char *login;

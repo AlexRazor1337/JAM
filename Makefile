@@ -7,7 +7,7 @@ UNAME := $(shell uname)
 
 server:
 	@if [ "$(UNAME)" = "Linux" ]; then \
-	clang -std=c11 -Wall -Wextra -Werror -Wpedantic ${SERVER_SRCS} ${LIBS_SRCS} -o server -pthread -ldl -Wno-unknown-pragmas; \
+	clang -std=c11 -Wall -Wextra -Werror -Wpedantic ${SERVER_SRCS} ${LIBS_SRCS} -o server -pthread -ldl -Wno-unknown-pragmas -Wformat; \
 	else \
 	clang -std=c11 -Wall -Wextra -Werror -Wpedantic ${SERVER_SRCS} ${LIBS_SRCS} -o server -pthread -ldl -Wno-unknown-pragmas; \
 	fi

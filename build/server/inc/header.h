@@ -1,5 +1,6 @@
 #ifndef JAM_HEADER_H
 #define JAM_HEADER_H
+#define _POSIX_C_SOURCE 200809L
 
 #include "../../libs/sqlite/sqlite3.h"
 #include "../../libs/list/list.h"
