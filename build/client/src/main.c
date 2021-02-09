@@ -19,7 +19,7 @@ void onDataWaitAuthAnswer(dyad_Event *e) { // get real user id
         client.uid = atoi(id);
         client.state = AUTH;
         free(id);
-        
+
         dyad_removeListener(server_stream, DYAD_EVENT_DATA, onDataWaitAuthAnswer, NULL);
         dyad_addListener(server_stream,    DYAD_EVENT_DATA, onDataPostAuth,       NULL);
     }
@@ -29,10 +29,10 @@ void onConnectedData(dyad_Event *e) { // Gets temporal user id
     printf("Temporal ID: %s\n", e->data);
     int id = atoi(e->data);
     printf("ASK FOR AUTH\n");
-    
+
     dyad_removeListener(server_stream, DYAD_EVENT_DATA, onConnectedData,      NULL);
     dyad_addListener(server_stream,    DYAD_EVENT_DATA, onDataWaitAuthAnswer, NULL);
-    
+
     dyad_writef(server_stream, "/@%d/authorize|%s|%s", id, client.login, client.password);
 }
 
@@ -54,11 +54,11 @@ void connectToServer() {
 int main() {
     dyad_init();
     connectToServer();
-    
+
     client.login = malloc(32);
     client.password = "testpas";
     client.state = UNAUTH;
-    
+
     size_t clsize = 32;
     getline(&client.login, &clsize, stdin); //TODO remove thistemporal shit
     sscanf(client.login, "%s\n", client.login);
@@ -69,14 +69,14 @@ int main() {
     char *text = malloc(32);
     size_t bufsize = 256;
     char *buffer = malloc(256);
-    
+
     while (dyad_getStreamCount() > 0) { // main loop
         if (client.state == AUTH) {
             action = malloc(32);
             printf("Select action: '@write id text'");
             getline(&buffer, &bufsize, stdin);
             sscanf(buffer, "@%s %s %[^\f]", action, id, text);
-            
+
             if (action) {
                 if (strncmp(action, "write", 5) == 0 && id && text) {
                     send_message(id, text);
@@ -84,12 +84,12 @@ int main() {
             }
             free(action); // TODO remove console shit
             action = NULL;
-            
+
             if (dyad_getState(server_stream) == DYAD_STATE_CLOSED) onDisconnect();
         }
         dyad_update();
     }
-    
+
     dyad_shutdown();
     return 0;
 }
