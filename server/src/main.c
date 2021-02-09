@@ -51,8 +51,8 @@ static char *jsonlist_from_jsones(t_list *list, int bsize) {
     return cursor;
 }
 
-char *constructMsgJson(char *chat_id, char* sender_id, char* text, unsigned int timestamp) {
-    (void) timestamp;
+char *constructMsgJson(char *chat_id, char *sender_id, char *text, unsigned int timestamp) {
+    (void)timestamp;
     // TODO Finish this
     char *result = malloc(strlen(chat_id) + strlen(sender_id) + strlen(text) + 128);
     //sprintf("{}")
@@ -60,7 +60,6 @@ char *constructMsgJson(char *chat_id, char* sender_id, char* text, unsigned int 
 }
 
 void handleMsgUpdate() {
-
 }
 
 void handleMsg(char *data) {
@@ -68,21 +67,20 @@ void handleMsg(char *data) {
     char *chat_id = malloc(16);
     char *text = malloc(strlen(data));
     sscanf(data, "/@%d/msg|%[^|]|%[^\r]", id, chat_id, text);
-    if (id && chat_id && text) { // && atoi(chat_id) != 0
-        char *str = malloc(strlen(data) + 256); // TODO make it bigger depending on message size
+    if (id && chat_id && text) {                 // && atoi(chat_id) != 0
+        char *str = malloc(strlen(data) + 256);  // TODO make it bigger depending on message size
         sprintf(str, "INSERT INTO messages(id_from, chat_id, text, timestamp) VALUES('%d', '%s', '%s', '%ld');", *id, chat_id, text, time(NULL));
         db_exec(db, str, NULL);
         free(str);
         str = NULL;
 
-
-        char** result_table = NULL;
+        char **result_table = NULL;
         int num_rows, num_cols;
         char *querry = malloc(96);
         sprintf(querry, "SELECT id FROM participants WHERE chat_id='%s'", chat_id);
         sqlite3_get_table(db, querry, &result_table, &num_rows, &num_cols, NULL);
-        char **result = (char **)malloc(sizeof(char *)*(num_cols*num_rows));
-        for (int i = 0; i < num_cols*num_rows; i++){
+        char **result = (char **)malloc(sizeof(char *) * (num_cols * num_rows));
+        for (int i = 0; i < num_cols * num_rows; i++) {
             result[i] = strdup(result_table[i + num_cols]);
             t_connection *reciever = find_node_uid(atoi(result[i]), connections);
             if (reciever) dyad_writef(reciever->stream, "/@%d/msg|%b", find_node_uid(*id, connections)->uid, text, strlen(text));
@@ -104,7 +102,7 @@ void handleChatsUpdate(char *data) {
     sscanf(data, "/@%d/getchats", id);
 
     // get chat ids
-    char** result_table = NULL;
+    char **result_table = NULL;
     int num_rows, num_cols;
     char *querry = malloc(238 + 32);
     sprintf(querry, "SELECT id, name, login, last_visit FROM users WHERE id IN (SELECT uid FROM participants WHERE uid != '%d' AND chat_id IN (SELECT id FROM chats WHERE is_group = '0' AND id IN (SELECT DISTINCT chat_id FROM participants WHERE uid = '%d')));", *id, *id);
@@ -138,15 +136,15 @@ void postAuthData(dyad_Event *e) {
 
     if (strcmp(action, "msg") == 0) {
         handleMsg(e->data);
-    } else if(strcmp(action, "getchats") == 0) {
+    } else if (strcmp(action, "getchats") == 0) {
         handleChatsUpdate(e->data);
     }
     free(action);
 }
 
 void getAuthDetails(dyad_Event *e) {
-    printf("%s\n", e->data);
-    char* result;
+    printf("%s| %d\n", e->data, mx_list_size(connections));
+    char *result;
 
     int *id = malloc(sizeof(int));
     char *login = malloc(64);
@@ -164,8 +162,10 @@ void getAuthDetails(dyad_Event *e) {
         printf("Client Authorized:\n");
         dyad_removeListener(client->stream, DYAD_EVENT_DATA, getAuthDetails, NULL);
 
-        dyad_writef(client->stream, "/@/auth_answer|%s", result); // Sends uid to client
+        dyad_writef(client->stream, "/@/auth_answer|%s", result);  // Sends uid to client
         dyad_addListener(client->stream, DYAD_EVENT_DATA, postAuthData, NULL);
+    } else if (client && !result) {
+        dyad_writef(client->stream, "/@/auth_answer|-1", result);
     }
     free(result);
     free(id);
@@ -205,7 +205,7 @@ int main() {
 #if defined(__linux__)
     setvbuf(stdout, NULL, _IONBF, 0);
 #endif
-    char* result;
+    char *result;
 
     printf("INITIALIZING JAM SERVER\n");
     printf("INITIALIZING SQLITE: ");
@@ -238,7 +238,7 @@ int main() {
 #pragma endregion sockets_init
 
     // TODO Remove when DB is consistent
-    register_user("Pomogite", "mem", "testpas");
+    register_user("Pomogite", "memo", "testpas");
     register_user("Lel", "mem2", "testpas");
     register_user("Lel", "mem3", "testpas");
     register_user("Lel", "mem3", "testpas");
@@ -249,11 +249,13 @@ int main() {
     free(str);
     str = NULL;
 
+    // TODO remove this shit
     db_exec(db, "INSERT INTO participants(uid, chat_id) VALUES('1', '1');", NULL);
     db_exec(db, "INSERT INTO participants(uid, chat_id) VALUES('2', '1');", NULL);
     db_exec(db, "INSERT INTO participants(uid, chat_id) VALUES('3', '1');", NULL);
     db_exec(db, "INSERT INTO participants(uid, chat_id) VALUES('4', '1');", NULL);
     handleChatsUpdate("/@1/getmsg");
+
     while (dyad_getStreamCount() > 0) {
         dyad_update();
         check_disconnected_client();
@@ -265,7 +267,7 @@ int main() {
 }
 
 void signal_handler(int signal_number) {
-    (void) signal_number;
+    (void)signal_number;
     /* TODO: Put exit cleanup code here. */
     printf("Bye-bye!\n");
     dyad_shutdown();

@@ -12,30 +12,36 @@ void sign_in_submit(GtkWidget *button, t_main_struct *main_struct) {
         if (strlen(main_struct->auth->login) >= 4) {
             if (strcmp(main_struct->auth->password, "")) {
                 if (strlen(main_struct->auth->password) >= 6) {
-                    // check if this user exist with this data
+                    if (client.state == AUTH_FAILED) {
+                        client.state = UNAUTH;
+                    }
 
-                    // get from server
                     strdel(&main_struct->auth->username);
                     main_struct->auth->username = strdup(main_struct->auth->login);
 
                     strdel(&main_struct->auth->password_repeat);
                     main_struct->auth->password_repeat = strdup(main_struct->auth->password);
 
-                    // if user exist then load his image
-                    main_struct->user_list = user_list_new(main_struct->auth->login, main_struct->auth->username);
+                    client.login = main_struct->auth->login;
+                    client.password = main_struct->auth->password;
 
-                    // parse users from server
+                    pthread_t thread;
+                    pthread_create(&thread, NULL, serverInit, &thread);
 
-                    // parse imitation
-                    user_list_push(&main_struct->user_list, "kili", "Liza");
-                    user_list_push(&main_struct->user_list, "Yana", "Yana");
-                    user_list_push(&main_struct->user_list, "vchkhr", "Slava");
-                    user_list_push(&main_struct->user_list, "AlexRazor", "Alex");
-                    user_list_push(&main_struct->user_list, "PAXANDOS", "Pasha");
-                    // user_list_print(main_struct->user_list);
+                    while (client.state == UNAUTH) {
+                        continue;
+                    }
 
-                    // create chat
-                    uchat(NULL, main_struct);
+                    if (client.state == AUTH) {
+                        main_struct->user_list = user_list_new(main_struct->auth->login, main_struct->auth->username);
+
+                        // TODO parse chats from server
+
+                        // create chat
+                        uchat(NULL, main_struct);
+                    } else {
+                        g_print("AUTH FAILED\n");  // show label
+                    }
                 } else {
                     gtk_widget_show_all(main_struct->password_is_too_short);
                 }

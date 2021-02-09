@@ -5,6 +5,8 @@
 #include <json-c/json.h>
 #include <string.h>
 
+#include "net.h"
+
 typedef struct s_auth {
     gchar *login;
     gchar *username;
@@ -136,6 +138,7 @@ void sign_in(GtkWidget *button, t_main_struct *main_struct);
 void sign_in_update_login(GtkWidget *entry, t_main_struct *main_struct);
 void sign_in_update_password(GtkWidget *entry, t_main_struct *main_struct);
 void sign_in_submit(GtkWidget *button, t_main_struct *main_struct);
+void sign_in_success_auth();
 
 // Users
 t_user *user_new(gchar *login, gchar *username);
