@@ -47,7 +47,6 @@ static char *jsonlist_from_jsones(t_list *list, int bsize) {
         carret = carret->next;
     }
 
-    printf("%s\n", cursor);
     return cursor;
 }
 
@@ -97,15 +96,12 @@ void handleMsg(char *data) {
     free(text);
 }
 
-void handleChatsUpdate(char *data) {
-    int *id = malloc(sizeof(int));
-    sscanf(data, "/@%d/getchats", id);
-
+void handleChatsUpdate(int id) {
     // get chat ids
     char **result_table = NULL;
     int num_rows, num_cols;
     char *querry = malloc(238 + 32);
-    sprintf(querry, "SELECT id, name, login, last_visit FROM users WHERE id IN (SELECT uid FROM participants WHERE uid != '%d' AND chat_id IN (SELECT id FROM chats WHERE is_group = '0' AND id IN (SELECT DISTINCT chat_id FROM participants WHERE uid = '%d')));", *id, *id);
+    sprintf(querry, "SELECT id, name, login, last_visit FROM users WHERE id IN (SELECT uid FROM participants WHERE uid != '%d' AND chat_id IN (SELECT id FROM chats WHERE is_group = '0' AND id IN (SELECT DISTINCT chat_id FROM participants WHERE uid = '%d')));", id, id);
     sqlite3_get_table(db, querry, &result_table, &num_rows, &num_cols, NULL);
 
     t_list *users_info = NULL;
@@ -119,6 +115,10 @@ void handleChatsUpdate(char *data) {
     char *json = jsonlist_from_jsones(users_info, 96 * mx_list_size(users_info));
     sqlite3_free_table(result_table);
     result_table = NULL;
+    
+    t_connection *client = find_node_uid(id, connections);
+    if (client) dyad_writef(client->stream, "/updmsg|%b", json, strlen(json));
+    
     free(querry);
     free(json);
     //get chat info from ids
@@ -126,7 +126,7 @@ void handleChatsUpdate(char *data) {
     //(row + 1) * num_cols + col
 
     // TODO Clear strings inside chat_ids
-    //if (reciever) dyad_writef(reciever->stream, "/updmsg|%b", text, strlen(text));
+    
 }
 
 void postAuthData(dyad_Event *e) {
@@ -136,9 +136,10 @@ void postAuthData(dyad_Event *e) {
 
     if (strcmp(action, "msg") == 0) {
         handleMsg(e->data);
-    } else if (strcmp(action, "getchats") == 0) {
-        handleChatsUpdate(e->data);
-    }
+    } 
+    // else if (strcmp(action, "getchats") == 0) {
+    //     handleChatsUpdate(e->data);
+    // }
     free(action);
 }
 
@@ -183,6 +184,7 @@ void getAuthDetails(dyad_Event *e) {
 
         dyad_writef(client->stream, "/@/auth_answer|%s|%s", result_table[(0 + 1) * num_cols + 0], result_table[(0 + 1) * num_cols + 1]);  // Sends uid to client
         dyad_addListener(client->stream, DYAD_EVENT_DATA, postAuthData, NULL);
+        handleChatsUpdate(client->uid);
     } else if (client && !result_table) {
         printf("FAILED\n");
         dyad_writef(client->stream, "/@/auth_answer|-1");
@@ -278,7 +280,7 @@ int main() {
     db_exec(db, "INSERT INTO participants(uid, chat_id) VALUES('2', '1');", NULL);
     db_exec(db, "INSERT INTO participants(uid, chat_id) VALUES('3', '1');", NULL);
     db_exec(db, "INSERT INTO participants(uid, chat_id) VALUES('4', '1');", NULL);
-    handleChatsUpdate("/@1/getmsg");
+    //handleChatsUpdate("/@1/getmsg");
 
     while (dyad_getStreamCount() > 0) {
         dyad_update();
