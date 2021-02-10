@@ -10,6 +10,15 @@ void send_message(char *id, char *text) {
 
 void onDataPostAuth(dyad_Event *e) {  // Anything, when user is AUTH'ed
     printf("Post Auth: %s\n", e->data);
+    if (strncmp("/@updmsg", e->data, 8) == 0) {
+        char *json = malloc(strlen(e->data));
+        sscanf(e->data, "/@updmsg|%[^\r]", json);
+        printf("here\n%s \n", json);
+        int fd = open("chats.json", O_WRONLY | O_APPEND | O_CREAT, 0644);
+        write(fd, json, strlen(json));
+        close(fd);
+        free(json);
+    }
 }
 
 void onDataWaitAuthAnswer(dyad_Event *e) {  // get real user id
@@ -26,6 +35,7 @@ void onDataWaitAuthAnswer(dyad_Event *e) {  // get real user id
         free(username);
         dyad_removeListener(server_stream, DYAD_EVENT_DATA, onDataWaitAuthAnswer, NULL);
         dyad_addListener(server_stream, DYAD_EVENT_DATA, onDataPostAuth, NULL);
+        dyad_writef(server_stream, "/@%d/getchats", client.uid);
     } else if (atoi(id) == -1) {
         client.state = AUTH_FAILED;
         dyad_close(server_stream);

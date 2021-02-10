@@ -115,9 +115,9 @@ void handleChatsUpdate(int id) {
     char *json = jsonlist_from_jsones(users_info, 96 * mx_list_size(users_info));
     sqlite3_free_table(result_table);
     result_table = NULL;
-    
+
     t_connection *client = find_node_uid(id, connections);
-    if (client) dyad_writef(client->stream, "/updmsg|%b", json, strlen(json));
+    if (client) dyad_writef(client->stream, "/@updmsg|%b", json, strlen(json));
     
     free(querry);
     free(json);
@@ -126,20 +126,20 @@ void handleChatsUpdate(int id) {
     //(row + 1) * num_cols + col
 
     // TODO Clear strings inside chat_ids
-    
+
 }
 
 void postAuthData(dyad_Event *e) {
     printf("PAD: %s\n", e->data);
     char *action = malloc(32);
-    sscanf(e->data, "/@%*d/%[^|]|", action);
+    int *id = malloc(sizeof(int));
+    sscanf(e->data, "/@%d/%[^|]|", id, action);
 
     if (strcmp(action, "msg") == 0) {
         handleMsg(e->data);
-    } 
-    // else if (strcmp(action, "getchats") == 0) {
-    //     handleChatsUpdate(e->data);
-    // }
+    } else if (strcmp(action, "getchats") == 0) {
+        handleChatsUpdate(*id);
+    }
     free(action);
 }
 
@@ -155,10 +155,10 @@ void getAuthDetails(dyad_Event *e) {
     char *check_result = NULL;
 
     sscanf(e->data, "/@%*d/%[^|]|", operation);
-    
+
     if (strncmp(operation, "signup", 6) == 0) {
         sscanf(e->data, "/@%d/signup|%[^|]|%[^|]|%s", id, login, password, username);
-        
+
         char *str_check = malloc(196);
         sprintf(str_check, "SELECT id FROM users WHERE login = '%s' LIMIT 1;", login);
         db_exec(db, str_check, &check_result);
@@ -168,7 +168,7 @@ void getAuthDetails(dyad_Event *e) {
     } else {
         sscanf(e->data, "/@%d/authorize|%[^|]|%s", id, login, password);
     }
-    
+
     //    sscanf("{\"temporal\":\"1\",\"login\":\"hello\",\"password\":\"pass\"}", "{\"temporal\":\"%d\",\"login\":\"%[^\"]\",\"password\":\"%[^\"]\'}", id, login, password);
     char **result_table = NULL;
     int num_rows = 0, num_cols  = 0;
@@ -184,14 +184,14 @@ void getAuthDetails(dyad_Event *e) {
 
         dyad_writef(client->stream, "/@/auth_answer|%s|%s", result_table[(0 + 1) * num_cols + 0], result_table[(0 + 1) * num_cols + 1]);  // Sends uid to client
         dyad_addListener(client->stream, DYAD_EVENT_DATA, postAuthData, NULL);
-        handleChatsUpdate(client->uid);
+
     } else if (client && !result_table) {
         printf("FAILED\n");
         dyad_writef(client->stream, "/@/auth_answer|-1");
     } else if (client) {
         dyad_writef(client->stream, "/@/auth_answer|-1");
     }
-    
+
     sqlite3_free_table(result_table);
     free(username);
     free(id);
