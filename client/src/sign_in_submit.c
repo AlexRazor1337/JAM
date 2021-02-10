@@ -16,26 +16,27 @@ void sign_in_submit(GtkWidget *button, t_main_struct *main_struct) {
                         client.state = UNAUTH;
                     }
 
-                    strdel(&main_struct->auth->username);
-                    main_struct->auth->username = strdup(main_struct->auth->login);
-
-                    strdel(&main_struct->auth->password_repeat);
-                    main_struct->auth->password_repeat = strdup(main_struct->auth->password);
 
                     client.login = main_struct->auth->login;
                     client.password = main_struct->auth->password;
 
                     t_connect_data *connect_data = (t_connect_data *)malloc(sizeof(t_connect_data));
 
-                    connect_data->thread = NULL;
+                    // connect_data->thread;
                     connect_data->to_sign_up = false;
-                    pthread_create(connect_data->thread, NULL, serverInit, connect_data);
+                    pthread_create(&connect_data->thread, NULL, serverInit, connect_data);
 
                     while (client.state == UNAUTH) {
                         continue;
                     }
 
                     if (client.state == AUTH) {
+                        strdel(&main_struct->auth->username);
+                        main_struct->auth->username = strdup(client.username);
+
+                        strdel(&main_struct->auth->password_repeat);
+                        main_struct->auth->password_repeat = strdup(main_struct->auth->password);
+
                         main_struct->user_list = user_list_new(main_struct->auth->login, main_struct->auth->username);
 
                         // TODO parse chats from server

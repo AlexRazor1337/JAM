@@ -144,30 +144,44 @@ void postAuthData(dyad_Event *e) {
 
 void getAuthDetails(dyad_Event *e) {
     printf("%s| %d\n", e->data, mx_list_size(connections));
-    char *result;
 
+    char *operation = malloc(32);
+    char *username = malloc(32);
     int *id = malloc(sizeof(int));
     char *login = malloc(64);
     char *password = malloc(64);
     char *str = malloc(196);
+    sscanf(e->data, "/@%*d/%[^|]|", operation);
+    
+    if (strncmp(operation, "signup", 6) == 0) {
+        sscanf(e->data, "/@%d/signup|%[^|]|%[^|]|%s", id, login, password, username);
+        register_user(username, login, password);
+    } else {
+        sscanf(e->data, "/@%d/authorize|%[^|]|%s", id, login, password);
+    //     //insert
+    //     *id = sqlite3_last_insert_rowid(db);
+    }
+    
     //    sscanf("{\"temporal\":\"1\",\"login\":\"hello\",\"password\":\"pass\"}", "{\"temporal\":\"%d\",\"login\":\"%[^\"]\",\"password\":\"%[^\"]\'}", id, login, password);
-
-    sscanf(e->data, "/@%d/authorize|%[^|]|%s", id, login, password);
-    sprintf(str, "SELECT id FROM users WHERE login = '%s' AND password = '%s' LIMIT 1;", login, password);
-    db_exec(db, str, &result);
+    char **result_table = NULL;
+    int num_rows, num_cols;
+    sprintf(str, "SELECT id, name FROM users WHERE login = '%s' AND password = '%s' LIMIT 1;", login, password);
+    sqlite3_get_table(db, str, &result_table, &num_rows, &num_cols, NULL);
 
     t_connection *client = find_node(*id, connections);
-    if (client && result) {
-        client->uid = atoi(result);
+    if (client && result_table) {
+        client->uid = atoi(result_table[(0 + 1) * num_cols + 0]);
         printf("Client Authorized:\n");
         dyad_removeListener(client->stream, DYAD_EVENT_DATA, getAuthDetails, NULL);
 
-        dyad_writef(client->stream, "/@/auth_answer|%s", result);  // Sends uid to client
+        dyad_writef(client->stream, "/@/auth_answer|%s|%s", result_table[(0 + 1) * num_cols + 0], result_table[(0 + 1) * num_cols + 1]);  // Sends uid to client
         dyad_addListener(client->stream, DYAD_EVENT_DATA, postAuthData, NULL);
-    } else if (client && !result) {
-        dyad_writef(client->stream, "/@/auth_answer|-1", result);
+    } else if (client && !result_table) {
+        dyad_writef(client->stream, "/@/auth_answer|-1");
     }
-    free(result);
+    
+    sqlite3_free_table(result_table);
+    free(username);
     free(id);
     free(login);
     free(password);

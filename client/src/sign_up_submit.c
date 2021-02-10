@@ -28,17 +28,18 @@ void sign_up_submit(GtkWidget *button, t_main_struct *main_struct) {
                                     uchat_settings_set_theme_provider(main_struct);
 
                                     client.login = main_struct->auth->login;
+                                    client.username = main_struct->auth->username;
                                     client.password = main_struct->auth->password;
 
                                     t_connect_data *connect_data = (t_connect_data *)malloc(sizeof(t_connect_data));
 
-                                    connect_data->thread = NULL;
                                     connect_data->to_sign_up = true;
-                                    pthread_create(connect_data->thread, NULL, serverInit, connect_data);
+                                    pthread_create(&connect_data->thread, NULL, serverInit, connect_data);
 
                                     while (client.state == UNAUTH) {
                                         continue;
                                     }
+
 
                                     if (client.state == AUTH) {
                                         main_struct->user_list = user_list_new(main_struct->auth->login, main_struct->auth->username);

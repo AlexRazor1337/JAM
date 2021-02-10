@@ -20,20 +20,23 @@
 #define SERVER_NAME_LEN_MAX 255
 #define SERVER_PORT 8000
 #define SERVER_ADRESS "127.0.0.1"  //"10.11.7.9"
+
 enum State { UNAUTH,
              AUTH,
              AUTH_FAILED };
+
 typedef struct s_client {
     char *login;
+    char *username;
     char *password;
     unsigned long int uid;
     enum State state;
-} t_client;
+}              t_client;
 
 typedef struct s_connect_data {
-    pthread_t *thread;
+    pthread_t thread;
     bool to_sign_up;
-} t_connect_data;
+}              t_connect_data;
 
 extern t_client client;
 
