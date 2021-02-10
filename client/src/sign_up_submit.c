@@ -15,17 +15,15 @@ void sign_up_submit(GtkWidget *button, t_main_struct *main_struct) {
 
     if (strcmp(main_struct->auth->login, "")) {
         if (strlen(main_struct->auth->login) >= 4) {
-            // check unique
             if (strcmp(main_struct->auth->username, "")) {
                 if (strlen(main_struct->auth->username) >= 4) {
                     if (strcmp(main_struct->auth->password, "")) {
                         if (strlen(main_struct->auth->password) >= 6) {
                             if (strcmp(main_struct->auth->password_repeat, "")) {
                                 if (!strcmp(main_struct->auth->password, main_struct->auth->password_repeat)) {
-                                    main_struct->user_list = user_list_new(main_struct->auth->login, main_struct->auth->username);
-
-                                    jamconfig_update_theme("default");
-                                    uchat_settings_set_theme_provider(main_struct);
+                                    if (client.state == AUTH_FAILED) {
+                                        client.state = UNAUTH;
+                                    }
 
                                     client.login = main_struct->auth->login;
                                     client.username = main_struct->auth->username;
@@ -40,9 +38,11 @@ void sign_up_submit(GtkWidget *button, t_main_struct *main_struct) {
                                         continue;
                                     }
 
-
                                     if (client.state == AUTH) {
                                         main_struct->user_list = user_list_new(main_struct->auth->login, main_struct->auth->username);
+
+                                        jamconfig_update_theme("default");
+                                        uchat_settings_set_theme_provider(main_struct);
 
                                         // create chat
                                         uchat(NULL, main_struct);

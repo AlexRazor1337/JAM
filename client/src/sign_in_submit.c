@@ -16,7 +16,6 @@ void sign_in_submit(GtkWidget *button, t_main_struct *main_struct) {
                         client.state = UNAUTH;
                     }
 
-
                     client.login = main_struct->auth->login;
                     client.password = main_struct->auth->password;
 

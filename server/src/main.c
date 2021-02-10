@@ -151,25 +151,32 @@ void getAuthDetails(dyad_Event *e) {
     char *login = malloc(64);
     char *password = malloc(64);
     char *str = malloc(196);
+    char *check_result = NULL;
+
     sscanf(e->data, "/@%*d/%[^|]|", operation);
     
     if (strncmp(operation, "signup", 6) == 0) {
         sscanf(e->data, "/@%d/signup|%[^|]|%[^|]|%s", id, login, password, username);
-        register_user(username, login, password);
+        
+        char *str_check = malloc(196);
+        sprintf(str_check, "SELECT id FROM users WHERE login = '%s' LIMIT 1;", login);
+        db_exec(db, str_check, &check_result);
+        if (!check_result) register_user(username, login, password);
+
+        free(str_check);
     } else {
         sscanf(e->data, "/@%d/authorize|%[^|]|%s", id, login, password);
-    //     //insert
-    //     *id = sqlite3_last_insert_rowid(db);
     }
     
     //    sscanf("{\"temporal\":\"1\",\"login\":\"hello\",\"password\":\"pass\"}", "{\"temporal\":\"%d\",\"login\":\"%[^\"]\",\"password\":\"%[^\"]\'}", id, login, password);
     char **result_table = NULL;
-    int num_rows, num_cols;
+    int num_rows = 0, num_cols  = 0;
     sprintf(str, "SELECT id, name FROM users WHERE login = '%s' AND password = '%s' LIMIT 1;", login, password);
     sqlite3_get_table(db, str, &result_table, &num_rows, &num_cols, NULL);
 
     t_connection *client = find_node(*id, connections);
-    if (client && result_table) {
+
+    if (client && (!check_result) && num_rows > 0) {
         client->uid = atoi(result_table[(0 + 1) * num_cols + 0]);
         printf("Client Authorized:\n");
         dyad_removeListener(client->stream, DYAD_EVENT_DATA, getAuthDetails, NULL);
@@ -177,6 +184,9 @@ void getAuthDetails(dyad_Event *e) {
         dyad_writef(client->stream, "/@/auth_answer|%s|%s", result_table[(0 + 1) * num_cols + 0], result_table[(0 + 1) * num_cols + 1]);  // Sends uid to client
         dyad_addListener(client->stream, DYAD_EVENT_DATA, postAuthData, NULL);
     } else if (client && !result_table) {
+        printf("FAILED\n");
+        dyad_writef(client->stream, "/@/auth_answer|-1");
+    } else if (client) {
         dyad_writef(client->stream, "/@/auth_answer|-1");
     }
     
