@@ -25,8 +25,11 @@ void sign_in_submit(GtkWidget *button, t_main_struct *main_struct) {
                     client.login = main_struct->auth->login;
                     client.password = main_struct->auth->password;
 
-                    pthread_t thread;
-                    pthread_create(&thread, NULL, serverInit, &thread);
+                    t_connect_data *connect_data = (t_connect_data *)malloc(sizeof(t_connect_data));
+
+                    connect_data->thread = NULL;
+                    connect_data->to_sign_up = false;
+                    pthread_create(connect_data->thread, NULL, serverInit, connect_data);
 
                     while (client.state == UNAUTH) {
                         continue;
@@ -40,7 +43,7 @@ void sign_in_submit(GtkWidget *button, t_main_struct *main_struct) {
                         // create chat
                         uchat(NULL, main_struct);
                     } else {
-                        g_print("AUTH FAILED\n");  // show label
+                        g_print("SIGN IN FAILED\n");  // show label
                     }
                 } else {
                     gtk_widget_show_all(main_struct->password_is_too_short);

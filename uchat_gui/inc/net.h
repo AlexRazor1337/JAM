@@ -30,6 +30,11 @@ typedef struct s_client {
     enum State state;
 } t_client;
 
+typedef struct s_connect_data {
+    pthread_t *thread;
+    bool to_sign_up;
+} t_connect_data;
+
 extern t_client client;
 
 void *serverInit(void *argument);

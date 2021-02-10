@@ -56,7 +56,7 @@ void connectToServer() {
 }
 
 void *serverInit(void *argument) {
-    pthread_t *thread = (pthread_t *)argument;
+    t_connect_data *connect_data = (t_connect_data *)argument;
 
     connectToServer();
     //client.login = "mem";  //malloc(32);
@@ -92,7 +92,7 @@ void *serverInit(void *argument) {
             if (dyad_getState(server_stream) == DYAD_STATE_CLOSED) onDisconnect();
         }
         if (client.state == AUTH_FAILED) {
-            pthread_exit(thread);
+            pthread_exit(connect_data->thread);
         }
         dyad_update();
     }
