@@ -46,7 +46,7 @@ void sign_in_submit(GtkWidget *button, t_main_struct *main_struct) {
                             continue;
                         }
 
-                        user_list_parse_from_json(&main_struct->user_list, client.json_data);
+                        user_list_parse_from_json_array(&main_struct->user_list, client.json_data);
 
                         strdel(&client.json_data);
 
