@@ -13,6 +13,9 @@ void onDataPostAuth(dyad_Event *e) {  // Anything, when user is AUTH'ed
     if (strncmp("/@updmsg", e->data, 8) == 0) {
         client.json_data = malloc(strlen(e->data));
         sscanf(e->data, "/@updmsg|%[^\r]", client.json_data);
+    } else if (strncmp("/@adduser", e->data, 9) == 0) {
+        //client.json_data = malloc(strlen(e->data));
+        //sscanf(e->data, "/@updmsg|%[^\r]", client.json_data);
     }
 }
 
@@ -23,7 +26,6 @@ void addUser(char *login) {
 void onDataWaitAuthAnswer(dyad_Event *e) {  // get real user id
     g_print("Real ID: %s\n", e->data);
     char *id = malloc(16);
-    // TODO read username
     char *username = malloc(32);
     sscanf(e->data, "/@/auth_answer|%[^|]|%s", id, username);
     if (id && atoi(id) != -1) {
@@ -38,14 +40,13 @@ void onDataWaitAuthAnswer(dyad_Event *e) {  // get real user id
     } else if (atoi(id) == -1) {
         client.state = AUTH_FAILED;
         dyad_close(server_stream);
-        g_print("Failed auth!\n");
+        printf("Failed auth!\n");
     }
 }
 
 void onConnectedData(dyad_Event *e) {  // Gets temporal user id
     printf("Temporal ID: %s\n", e->data);
     int id = atoi(e->data);
-    printf("ASK FOR AUTH\n");
 
     dyad_removeListener(server_stream, DYAD_EVENT_DATA, onConnectedData, NULL);
     dyad_addListener(server_stream, DYAD_EVENT_DATA, onDataWaitAuthAnswer, NULL);
@@ -88,6 +89,5 @@ void *serverInit(void *argument) {
         dyad_update();
     }
 
-    //    dyad_shutdown();
     return NULL;
 }

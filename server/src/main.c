@@ -237,7 +237,7 @@ int main() {
     signal(SIGINT, signal_handler);
 #pragma endregion sockets_init
     register_user("MemoMmm", "memo", "qwerty");
-
+    register_user("Ayyyyy", "lmao", "qwerty");
     while (dyad_getStreamCount() > 0) {
         dyad_update();
         check_disconnected_client();
