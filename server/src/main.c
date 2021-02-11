@@ -16,39 +16,6 @@ void register_user(char *name, char *login, char *password) {
     free(str);
 }
 
-static char *jsonlist_from_jsones(t_list *list, int bsize) {
-    char *final_json = malloc(bsize);
-    char *temporal = malloc(bsize);
-
-    char *cursor = temporal;
-    char *cursor_2 = final_json;
-    if (mx_list_size(list) == 1) {
-        sprintf(final_json, "[%s]", (char *)list->data);
-        free(temporal);
-        return final_json;
-    }
-
-    t_list *carret = list;
-    sprintf(final_json, "[%s", (char *)carret->data);
-    carret = carret->next;
-    while (carret) {
-        if (carret->next) {
-            sprintf(cursor, "%s,%s", cursor_2, (char *)carret->data);
-            free(cursor_2);
-            cursor_2 = malloc(bsize);
-            char *temp = cursor_2;
-            cursor_2 = cursor;
-            cursor = temp;
-        } else {
-            sprintf(cursor, "%s,%s]", cursor_2, (char *)carret->data);
-            free(cursor_2);
-            cursor_2 = NULL;
-        }
-        carret = carret->next;
-    }
-
-    return cursor;
-}
 
 char *constructMsgJson(char *chat_id, char *sender_id, char *text, unsigned int timestamp) {
     (void)timestamp;
@@ -125,9 +92,9 @@ void handleChatsUpdate(int id) {
     result_table = NULL;
 
 
-    
+
     free(querry);
-    
+
     //get chat info from ids
     //GET USERS AND GROUPS SEPARATELY
     //(row + 1) * num_cols + col
@@ -136,12 +103,27 @@ void handleChatsUpdate(int id) {
 
 }
 
+void createChatWithusers(int id, int sid) {
+    (void) id;
+    (void) sid;
+    //TODO
+    // char *str = malloc(196);
+    // sprintf(str, "INSERT INTO chats(is_group) VALUES('%d');", false);
+    // db_exec(db, str, NULL);
+    // free(str);
+    // str = NULL;
+
+    // // TODO remove this shit
+    // db_exec(db, "INSERT INTO participants(uid, chat_id) VALUES('1', '1');", NULL);
+    // db_exec(db, "INSERT INTO participants(uid, chat_id) VALUES('2', '1');", NULL);
+}
+
 void handleAddUser(char *data) {
     int *id = malloc(sizeof(int));
     char *login = malloc(strlen(data));
     sscanf(data, "/@%d/%*[^|]|%s", id, login);
     printf("Add user %s\n", login);
-    
+
     char **result_table = NULL;
     int num_rows, num_cols;
     char *querry = malloc(238 + 32);

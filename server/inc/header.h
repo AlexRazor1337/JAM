@@ -42,6 +42,7 @@ int generate_unique_id(t_list *connections);
 t_connection *find_node(int id, t_list *connections);
 t_connection *find_node_uid(int uid, t_list *connections);
 bool is_dir_exists(char *name);
+char *jsonlist_from_jsones(t_list *list, int bsize);
 
 int db_exec(sqlite3 *db, char *querry, char **result);
 
