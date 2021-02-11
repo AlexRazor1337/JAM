@@ -93,3 +93,15 @@ char *jsonlist_from_jsones(t_list *list, int bsize) {
 
     return cursor;
 }
+
+t_connection *create_connection(dyad_Stream *stream, t_list *connections) {
+    t_connection *new_connection = malloc(sizeof(t_connection));
+    new_connection->stream = stream;
+    new_connection->id = generate_unique_id(connections);
+    return new_connection;
+}
+
+void strdel(char **str) {
+    free(*str);
+    *str = NULL;
+}

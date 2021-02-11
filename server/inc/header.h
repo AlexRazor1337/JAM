@@ -26,12 +26,14 @@
 
 #define SERVER_PORT 8000
 #define JSON_OP_SIZE 1024
+#define LOGIN_SIZE 16
+#define PASSWORD_SIZE 32
+#define USERNAME_SIZE 32
 extern int errno;
 
 typedef struct s_connection {
     int id;
     int uid;
-    void (*dataListener)(dyad_Event *);
     dyad_Stream *stream;
 } t_connection;
 
@@ -43,6 +45,8 @@ t_connection *find_node(int id, t_list *connections);
 t_connection *find_node_uid(int uid, t_list *connections);
 bool is_dir_exists(char *name);
 char *jsonlist_from_jsones(t_list *list, int bsize);
+t_connection *create_connection(dyad_Stream *stream, t_list *connections);
+void strdel(char **str);
 
 int db_exec(sqlite3 *db, char *querry, char **result);
 
