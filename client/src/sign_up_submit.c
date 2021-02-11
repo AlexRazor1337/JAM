@@ -41,12 +41,13 @@ void sign_up_submit(GtkWidget *button, t_main_struct *main_struct) {
                                     }
 
                                     if (client.state == AUTH) {
-                                        main_struct->user_list = user_list_new(main_struct->auth->login, main_struct->auth->username);
+                                        main_struct->auth->id = client.uid;
+
+                                        main_struct->user_list = user_list_new(main_struct->auth->id, main_struct->auth->login, main_struct->auth->username);
 
                                         jamconfig_update_theme("default");
                                         uchat_settings_set_theme_provider(main_struct);
 
-                                        // create chat
                                         uchat(NULL, main_struct);
                                     } else {
                                         gtk_widget_show_all(main_struct->auth_is_failed);

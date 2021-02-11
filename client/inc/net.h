@@ -16,6 +16,7 @@
 #include <unistd.h>
 
 #include "../../libs/dyad/dyad.h"
+#include "../../libs/list/list.h"
 
 #define SERVER_NAME_LEN_MAX 255
 #define SERVER_PORT 8000
@@ -29,6 +30,7 @@ typedef struct s_client {
     char *login;
     char *username;
     char *password;
+    char *json_data;
     unsigned long int uid;
     enum State state;
 }              t_client;
@@ -39,8 +41,10 @@ typedef struct s_connect_data {
 }              t_connect_data;
 
 extern t_client client;
+extern dyad_Stream *server_stream;
 
 void *serverInit(void *argument);
+void addUser(char *login);
 void connectToServer();
 
 int codepoint_len(const uint32_t cp); /* len of associated utf-8 char */

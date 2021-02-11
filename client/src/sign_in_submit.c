@@ -32,16 +32,25 @@ void sign_in_submit(GtkWidget *button, t_main_struct *main_struct) {
                     }
 
                     if (client.state == AUTH) {
+                        main_struct->auth->id = client.uid;
+
                         strdel(&main_struct->auth->username);
                         main_struct->auth->username = strdup(client.username);
 
                         strdel(&main_struct->auth->password_repeat);
                         main_struct->auth->password_repeat = strdup(main_struct->auth->password);
 
-                        main_struct->user_list = user_list_new(main_struct->auth->login, main_struct->auth->username);
+                        main_struct->user_list = user_list_new(main_struct->auth->id, main_struct->auth->login, main_struct->auth->username);
 
-                        usleep(500);
-                        user_list_parse_from_json(&main_struct->user_list, "chats.json");
+                        while (!client.json_data) {
+                            continue;
+                        }
+
+                        user_list_parse_from_json(&main_struct->user_list, client.json_data);
+
+                        strdel(&client.json_data);
+
+                        user_list_print(main_struct->user_list);
 
                         uchat(NULL, main_struct);
                     } else {

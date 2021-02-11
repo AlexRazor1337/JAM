@@ -8,6 +8,7 @@
 #include "net.h"
 
 typedef struct s_auth {
+    guint id;
     gchar *login;
     gchar *username;
     gchar *password;
@@ -16,6 +17,7 @@ typedef struct s_auth {
 } t_auth;
 
 typedef struct s_user {
+    guint id;
     gchar *login;
     gchar *username;
     gchar *image;
@@ -143,11 +145,11 @@ void sign_in_submit(GtkWidget *button, t_main_struct *main_struct);
 void sign_in_success_auth();
 
 // Users
-t_user *user_new(gchar *login, gchar *username);
-t_user_list *user_list_new(gchar *login, gchar *username);
-void user_list_push(t_user_list **user_list, gchar *login, gchar *username);
+t_user *user_new(guint id, gchar *login, gchar *username);
+t_user_list *user_list_new(guint id, gchar *login, gchar *username);
+void user_list_push(t_user_list **user_list, guint id, gchar *login, gchar *username);
 void user_list_print(t_user_list *user_list);
-void user_list_parse_from_json(t_user_list **user_list, const gchar *filename);
+void user_list_parse_from_json(t_user_list **user_list, const gchar *str);
 
 // Uchat
 void uchat(GtkWidget *button, t_main_struct *main_struct);

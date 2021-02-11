@@ -103,30 +103,60 @@ void handleChatsUpdate(int id) {
     char *querry = malloc(238 + 32);
     sprintf(querry, "SELECT id, name, login, last_visit FROM users WHERE id IN (SELECT uid FROM participants WHERE uid != '%d' AND chat_id IN (SELECT id FROM chats WHERE is_group = '0' AND id IN (SELECT DISTINCT chat_id FROM participants WHERE uid = '%d')));", id, id);
     sqlite3_get_table(db, querry, &result_table, &num_rows, &num_cols, NULL);
+    if (num_rows > 0) {
+        t_list *users_info = NULL;
+        for (int i = 0; i < num_rows; i++) {
+            char *temp = malloc(256);
+            sprintf(temp, "{\"id\":\"%s\",\"name\":\"%s\",\"login\":\"%s\"}\n", result_table[(i + 1) * num_cols + 0], result_table[(i + 1) * num_cols + 1], result_table[(i + 1) * num_cols + 2]);
+            mx_push_back(&users_info, strdup(temp));
+            free(temp);
+        }
 
-    t_list *users_info = NULL;
-    for (int i = 0; i < num_rows; i++) {
-        char *temp = malloc(256);
-        sprintf(temp, "{\"id\":\"%s\",\"name\":\"%s\",\"login\":\"%s\"}\n", result_table[(i + 1) * num_cols + 0], result_table[(i + 1) * num_cols + 1], result_table[(i + 1) * num_cols + 2]);
-        mx_push_back(&users_info, strdup(temp));
-        free(temp);
+        char *json = jsonlist_from_jsones(users_info, 96 * mx_list_size(users_info));
+        t_connection *client = find_node_uid(id, connections);
+        if (client) dyad_writef(client->stream, "/@updmsg|%b", json, strlen(json));
+        free(json);
+    } else {
+        t_connection *client = find_node_uid(id, connections);
+        if (client) dyad_writef(client->stream, "/@updmsg|[]");
     }
 
-    char *json = jsonlist_from_jsones(users_info, 96 * mx_list_size(users_info));
     sqlite3_free_table(result_table);
     result_table = NULL;
 
-    t_connection *client = find_node_uid(id, connections);
-    if (client) dyad_writef(client->stream, "/@updmsg|%b", json, strlen(json));
+
     
     free(querry);
-    free(json);
+    
     //get chat info from ids
     //GET USERS AND GROUPS SEPARATELY
     //(row + 1) * num_cols + col
 
     // TODO Clear strings inside chat_ids
 
+}
+
+void handleAddUser(char *data) {
+    int *id = malloc(sizeof(int));
+    char *login = malloc(strlen(data));
+    sscanf(data, "/@%d/%*[^|]|%s", id, login);
+    printf("Add user %s\n", login);
+    
+    char **result_table = NULL;
+    int num_rows, num_cols;
+    char *querry = malloc(238 + 32);
+    sprintf(querry, "SELECT id, name, login, last_visit FROM users WHERE login = '%s';", login);
+    sqlite3_get_table(db, querry, &result_table, &num_rows, &num_cols, NULL);
+    if (num_rows > 0) {
+        char *temp = malloc(256);
+        sprintf(temp, "{\"id\":\"%s\",\"name\":\"%s\",\"login\":\"%s\"}\n", result_table[1 * num_cols + 0], result_table[1 * num_cols + 1], result_table[1 * num_cols + 2]);
+
+        t_connection *client = find_node_uid(*id, connections);
+        if (client) dyad_writef(client->stream, "/@adduser|%b", temp, strlen(temp));
+    } else {
+        t_connection *client = find_node_uid(*id, connections);
+        if (client) dyad_writef(client->stream, "/@adduser|[]");
+    }
 }
 
 void postAuthData(dyad_Event *e) {
@@ -139,6 +169,8 @@ void postAuthData(dyad_Event *e) {
         handleMsg(e->data);
     } else if (strcmp(action, "getchats") == 0) {
         handleChatsUpdate(*id);
+    } else if (strcmp(action, "adduser") == 0) {
+        handleAddUser(e->data);
     }
     free(action);
 }
@@ -233,7 +265,7 @@ int main() {
 #endif
     char *result;
 
-    printf("INITIALIZING JAM SERVER\n");
+    printf("INITIALIZING JAM SERVER 🤡\n");
     printf("INITIALIZING SQLITE: ");
 #pragma region db_init
     if (!is_dir_exists("server_data"))

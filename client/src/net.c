@@ -11,14 +11,13 @@ void send_message(char *id, char *text) {
 void onDataPostAuth(dyad_Event *e) {  // Anything, when user is AUTH'ed
     printf("Post Auth: %s\n", e->data);
     if (strncmp("/@updmsg", e->data, 8) == 0) {
-        char *json = malloc(strlen(e->data));
-        sscanf(e->data, "/@updmsg|%[^\r]", json);
-        printf("here\n%s \n", json);
-        int fd = open("chats.json", O_WRONLY | O_APPEND | O_CREAT, 0644);
-        write(fd, json, strlen(json));
-        close(fd);
-        free(json);
+        client.json_data = malloc(strlen(e->data));
+        sscanf(e->data, "/@updmsg|%[^\r]", client.json_data);
     }
+}
+
+void addUser(char *login) {
+    dyad_writef(server_stream, "/@%d/adduser|%s", client.uid, login);
 }
 
 void onDataWaitAuthAnswer(dyad_Event *e) {  // get real user id
