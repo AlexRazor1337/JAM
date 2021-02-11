@@ -10,4 +10,5 @@ void jamconfig_update_theme(gchar *theme) {
     }
 
     json_object_to_file("resource/config/jamconfig.json", json);
+    json_object_put(json);
 }

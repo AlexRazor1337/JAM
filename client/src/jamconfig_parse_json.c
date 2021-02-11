@@ -13,5 +13,7 @@ gchar *jamconfig_parse_json(t_main_struct *main_struct) {
         }
     }
 
+    json_object_put(json);
+
     return theme;
 }

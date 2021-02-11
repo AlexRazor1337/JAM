@@ -149,7 +149,9 @@ t_user *user_new(guint id, gchar *login, gchar *username);
 t_user_list *user_list_new(guint id, gchar *login, gchar *username);
 void user_list_push(t_user_list **user_list, guint id, gchar *login, gchar *username);
 void user_list_print(t_user_list *user_list);
+guint user_list_size(t_user_list *user_list);
 void user_list_parse_from_json(t_user_list **user_list, const gchar *str);
+void user_list_parse_from_json_array(t_user_list **user_list, const gchar *str);
 
 // Uchat
 void uchat(GtkWidget *button, t_main_struct *main_struct);
