@@ -8,6 +8,8 @@ void sign_in_submit(GtkWidget *button, t_main_struct *main_struct) {
     gtk_widget_hide(main_struct->password_is_empty);
     gtk_widget_hide(main_struct->password_is_too_short);
 
+    gtk_widget_hide(main_struct->auth_is_failed);
+
     if (strcmp(main_struct->auth->login, "")) {
         if (strlen(main_struct->auth->login) >= 4) {
             if (strcmp(main_struct->auth->password, "")) {
@@ -43,7 +45,7 @@ void sign_in_submit(GtkWidget *button, t_main_struct *main_struct) {
                         // create chat
                         uchat(NULL, main_struct);
                     } else {
-                        g_print("SIGN IN FAILED\n");  // show label
+                        gtk_widget_show_all(main_struct->auth_is_failed);
                     }
                 } else {
                     gtk_widget_show_all(main_struct->password_is_too_short);

@@ -62,6 +62,8 @@ typedef struct s_main_struct {
 
     GtkWidget *password_repeat_is_not_identical;
 
+    GtkWidget *auth_is_failed;
+
     GtkWidget *settings_box;
     GtkWidget *uchat_box;
 

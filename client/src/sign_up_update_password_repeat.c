@@ -3,6 +3,7 @@
 void sign_up_update_password_repeat(GtkWidget *entry, t_main_struct *main_struct) {
     gtk_widget_hide(main_struct->password_is_empty);
     gtk_widget_hide(main_struct->password_repeat_is_not_identical);
+    gtk_widget_hide(main_struct->auth_is_failed);
 
     gchar *password_repeat = (gchar *)gtk_entry_get_text(GTK_ENTRY(entry));
 

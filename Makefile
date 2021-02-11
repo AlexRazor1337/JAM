@@ -25,5 +25,6 @@ uninstall: clean
 
 clean:
 	@rm -rf server_data
+	@rm -f chats.json
 
 reinstall: uninstall all

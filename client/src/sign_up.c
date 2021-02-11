@@ -29,9 +29,10 @@ void sign_up(GtkWidget *button, t_main_struct *main_struct) {
     GtkWidget *password_repeat_entry;
     GtkWidget *password_repeat_is_not_identical;
 
-    GtkWidget *control_box;
-    GtkWidget *submit;
-    GtkWidget *unsubmit;
+    GtkWidget *control_fixed;
+    GtkWidget *submit_button;
+    GtkWidget *unsubmit_button;
+    GtkWidget *auth_is_failed;
 
     // window
     sign_up_window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
@@ -142,19 +143,24 @@ void sign_up(GtkWidget *button, t_main_struct *main_struct) {
     gtk_widget_set_name(password_repeat_is_not_identical, "password_repeat_is_not_identical");
     gtk_widget_set_size_request(password_repeat_is_not_identical, 400, 40);
 
-    // control box for submit and unsubmit
-    control_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
-    gtk_widget_set_name(control_box, "control_box");
+    // control fixed for submit_button and unsubmit_button
+    control_fixed = gtk_fixed_new();
+    gtk_widget_set_name(control_fixed, "control_fixed");
 
-    // unsubmit button
-    unsubmit = gtk_button_new_with_label("BACK");
-    gtk_widget_set_name(unsubmit, "unsubmit");
-    gtk_widget_set_size_request(unsubmit, 200, 40);
+    // login in not availabel -> error label
+    auth_is_failed = gtk_label_new("LOGIN IS NOT AVAILABEL");
+    gtk_widget_set_name(auth_is_failed, "auth_is_failed");
+    gtk_widget_set_size_request(auth_is_failed, 400, 40);
 
-    // submit button
-    submit = gtk_button_new_with_label("SIGN UP");
-    gtk_widget_set_name(submit, "submit");
-    gtk_widget_set_size_request(submit, 200, 40);
+    // unsubmit_button button
+    unsubmit_button = gtk_button_new_with_label("BACK");
+    gtk_widget_set_name(unsubmit_button, "unsubmit_button");
+    gtk_widget_set_size_request(unsubmit_button, 193, 40);
+
+    // submit_button button
+    submit_button = gtk_button_new_with_label("SIGN IN");
+    gtk_widget_set_name(submit_button, "submit_button");
+    gtk_widget_set_size_request(submit_button, 193, 40);
 
     // packing
     gtk_box_pack_start(GTK_BOX(logo_box), logo_image, FALSE, FALSE, 0);
@@ -175,14 +181,15 @@ void sign_up(GtkWidget *button, t_main_struct *main_struct) {
     gtk_fixed_put(GTK_FIXED(password_repeat_fixed), password_repeat_entry, 0, 0);
     gtk_fixed_put(GTK_FIXED(password_repeat_fixed), password_repeat_is_not_identical, 0, 54);
 
-    gtk_box_pack_start(GTK_BOX(control_box), unsubmit, FALSE, FALSE, 0);
-    gtk_box_pack_start(GTK_BOX(control_box), submit, FALSE, FALSE, 0);
+    gtk_fixed_put(GTK_FIXED(control_fixed), unsubmit_button, 0, 0);
+    gtk_fixed_put(GTK_FIXED(control_fixed), submit_button, 207, 0);
+    gtk_fixed_put(GTK_FIXED(control_fixed), auth_is_failed, 0, 54);
 
     gtk_box_pack_start(GTK_BOX(sign_box), login_fixed, FALSE, FALSE, 7);
     gtk_box_pack_start(GTK_BOX(sign_box), username_fixed, FALSE, FALSE, 7);
     gtk_box_pack_start(GTK_BOX(sign_box), password_fixed, FALSE, FALSE, 7);
     gtk_box_pack_start(GTK_BOX(sign_box), password_repeat_fixed, FALSE, FALSE, 7);
-    gtk_box_pack_start(GTK_BOX(sign_box), control_box, FALSE, FALSE, 0);
+    gtk_box_pack_start(GTK_BOX(sign_box), control_fixed, FALSE, FALSE, 7);
 
     gtk_box_pack_start(GTK_BOX(sign_up_box), logo_box, FALSE, FALSE, 0);
     gtk_box_pack_start(GTK_BOX(sign_up_box), sign_box, FALSE, FALSE, 0);
@@ -200,8 +207,8 @@ void sign_up(GtkWidget *button, t_main_struct *main_struct) {
     g_signal_connect(password_entry, "activate", G_CALLBACK(sign_up_submit), main_struct);
     g_signal_connect(password_repeat_entry, "activate", G_CALLBACK(sign_up_submit), main_struct);
 
-    g_signal_connect(unsubmit, "clicked", G_CALLBACK(authorization), main_struct);
-    g_signal_connect(submit, "clicked", G_CALLBACK(sign_up_submit), main_struct);
+    g_signal_connect(unsubmit_button, "clicked", G_CALLBACK(authorization), main_struct);
+    g_signal_connect(submit_button, "clicked", G_CALLBACK(sign_up_submit), main_struct);
 
     g_signal_connect(sign_up_window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
 
@@ -220,14 +227,14 @@ void sign_up(GtkWidget *button, t_main_struct *main_struct) {
     gtk_widget_show(username_fixed);
     gtk_widget_show(password_fixed);
     gtk_widget_show(password_repeat_fixed);
-    gtk_widget_show(control_box);
+    gtk_widget_show(control_fixed);
 
     gtk_widget_show(login_entry);
     gtk_widget_show(username_entry);
     gtk_widget_show(password_entry);
     gtk_widget_show(password_repeat_entry);
-    gtk_widget_show(unsubmit);
-    gtk_widget_show(submit);
+    gtk_widget_show(unsubmit_button);
+    gtk_widget_show(submit_button);
 
     // init struct
     main_struct->sign_up_window = sign_up_window;
@@ -243,6 +250,8 @@ void sign_up(GtkWidget *button, t_main_struct *main_struct) {
     main_struct->password_is_too_short = password_is_too_short;
 
     main_struct->password_repeat_is_not_identical = password_repeat_is_not_identical;
+
+    main_struct->auth_is_failed = auth_is_failed;
 
     strdel(&main_struct->auth->login);
     main_struct->auth->login = strdup("");
