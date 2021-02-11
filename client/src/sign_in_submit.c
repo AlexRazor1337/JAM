@@ -40,9 +40,9 @@ void sign_in_submit(GtkWidget *button, t_main_struct *main_struct) {
 
                         main_struct->user_list = user_list_new(main_struct->auth->login, main_struct->auth->username);
 
-                        // TODO parse chats from server
+                        usleep(500);
+                        user_list_parse_from_json(&main_struct->user_list, "chats.json");
 
-                        // create chat
                         uchat(NULL, main_struct);
                     } else {
                         gtk_widget_show_all(main_struct->auth_is_failed);
