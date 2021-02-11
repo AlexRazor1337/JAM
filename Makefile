@@ -11,13 +11,17 @@ install: uchat_server uchat
 
 uchat_server:
 	@if [ "$(UNAME)" = "Linux" ]; then \
-		clang -std=c11 -Wall -Wextra -Werror -Wpedantic ${SERVER_SRCS} ${LIBS_SRCS} -o uchat_server -pthread -ldl -Wno-unknown-pragmas -Wformat; \
+		clang ${SERVER_SRCS} ${LIBS_SRCS} -o uchat_server -pthread -ldl -Wno-unknown-pragmas -Wformat; \
 	else \
 		clang -std=c11 -Wall -Wextra -Werror -Wpedantic ${SERVER_SRCS} ${LIBS_SRCS} -o uchat_server -pthread -ldl -Wno-unknown-pragmas; \
 	fi
 
 uchat:
-	@clang -std=c11 -Wall -Wextra -Werror -Wpedantic ${UCHAT_SRCS} ${LIBS_SRCS} `pkg-config --cflags --libs gtk+-3.0` `pkg-config --cflags --libs json-c` -I client/inc/ -o uchat
+	@if [ "$(UNAME)" = "Linux" ]; then \
+		clang ${UCHAT_SRCS} ${LIBS_SRCS} `pkg-config --cflags --libs gtk+-3.0` `pkg-config --cflags --libs json-c` -I client/inc/ -pthread -ldl -o uchat; \
+	else \
+		clang -std=c11 -Wall -Wextra -Werror -Wpedantic ${UCHAT_SRCS} ${LIBS_SRCS} `pkg-config --cflags --libs gtk+-3.0` `pkg-config --cflags --libs json-c` -I client/inc/ -pthread -ldl -o uchat; \
+	fi
 
 uninstall: clean
 	@rm -f uchat_server

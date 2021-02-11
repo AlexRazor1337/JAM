@@ -48,6 +48,8 @@ void sign_up_submit(GtkWidget *button, t_main_struct *main_struct) {
                                         jamconfig_update_theme("default");
                                         uchat_settings_set_theme_provider(main_struct);
 
+                                        strdel(&client.json_data);
+
                                         uchat(NULL, main_struct);
                                     } else {
                                         gtk_widget_show_all(main_struct->auth_is_failed);

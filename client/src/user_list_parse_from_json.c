@@ -16,7 +16,7 @@ void user_list_parse_from_json(t_user_list **user_list, const gchar *str) {
         }
     }
 
-    if (id && login && username) {
+    if (login && username) {
         user_list_push(user_list, id, login, username);
     }
 

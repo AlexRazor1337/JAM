@@ -104,7 +104,7 @@ static void handleAddUser(char *data) {
         strdel(&user_json);
     } else {
         t_connection *client = find_node_uid(*id, connections);
-        if (client) dyad_writef(client->stream, "/@adduser|[]");
+        if (client) dyad_writef(client->stream, "/@adduser|{}");
     }
 
     sqlite3_free_table(result_table);
@@ -251,7 +251,7 @@ int main() {
 void signal_handler(int signal_number) {
     (void) signal_number;
     /* TODO: Put exit cleanup code here. */
-    printf("Bye-bye!\n");
+    printf("\nBye-bye!\n");
     dyad_shutdown();
     exit(EXIT_SUCCESS);
 }
