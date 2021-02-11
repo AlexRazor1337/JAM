@@ -1,7 +1,7 @@
 #include "client.h"
 
 void user_list_parse_from_json(t_user_list **user_list, const gchar *str) {
-    json_object *json = json_tokener_parse(client.json_data);
+    json_object *json = json_tokener_parse(str);
     gchar *username = NULL;
     gchar *login = NULL;
     guint id;
@@ -22,5 +22,4 @@ void user_list_parse_from_json(t_user_list **user_list, const gchar *str) {
 
     strdel(&login);
     strdel(&username);
-    json_object_put(json);
 }

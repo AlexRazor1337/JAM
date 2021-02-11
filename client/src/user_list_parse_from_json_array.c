@@ -24,9 +24,5 @@ void user_list_parse_from_json_array(t_user_list **user_list, const gchar *str) 
     
         strdel(&login);
         strdel(&username);
-        json_object_put(data);
     }
-
-    array_list_free(array);
-    json_object_put(json);
 }
