@@ -26,19 +26,19 @@ static void register_user(char *name, char *login, char *password) {
 
 static void handleMsg(char *data) {
     int *id = malloc(sizeof(int));
-    char *chat_id = malloc(sizeof(int));
+    char *reciever_id = malloc(sizeof(int));
     char *text = malloc(strlen(data));
-    sscanf(data, "/@%d/msg|%[^|]|%[^\r]", id, chat_id, text);
-    if (id && chat_id && text) {
+    sscanf(data, "/@%d/msg|%[^|]|%[^\r]", id, reciever_id, text);
+    if (id && reciever_id && text) {
         char *querry = malloc(strlen(data) + 256);  // TODO make it bigger depending on message size
-        sprintf(querry, "INSERT INTO messages(id_from, chat_id, text, timestamp) VALUES('%d', '%s', '%s', '%ld');", *id, chat_id, text, time(NULL));
+        sprintf(querry, "INSERT INTO messages(id_sender, id_reciever, text, timestamp) VALUES('%d', '%s', '%s', '%ld');", *id, reciever_id, text, time(NULL));
         db_exec(db, querry, NULL);
         strdel(&querry);
 
         char **result_table = NULL;
         int rows, cols;
         querry = malloc(47 + sizeof(int));
-        sprintf(querry, "SELECT id FROM participants WHERE chat_id='%s'", chat_id);
+        sprintf(querry, "SELECT id FROM participants WHERE chat_id='%s'", reciever_id);
         sqlite3_get_table(db, querry, &result_table, &rows, &cols, NULL);
         for (int i = 0; i < cols * rows; i++) {
             t_connection *reciever = find_node_uid(atoi(result_table[i + cols]), connections);
@@ -51,21 +51,22 @@ static void handleMsg(char *data) {
 
     free(id);
     id = NULL;
-    strdel(&chat_id);
+    strdel(&reciever_id);
     strdel(&text);
 }
+
 
 static void handleChatsUpdate(int id) {
     char **result_table = NULL;
     int rows, cols;
     char *querry = malloc(238 + sizeof(int) * 2);
-    sprintf(querry, "SELECT id, name, login, last_visit FROM users WHERE id IN (SELECT uid FROM participants WHERE uid != '%d' AND chat_id IN (SELECT id FROM chats WHERE is_group = '0' AND id IN (SELECT DISTINCT chat_id FROM participants WHERE uid = '%d')));", id, id);
+    sprintf(querry, "SELECT id, name, login, last_visit FROM users WHERE id IN (SELECT DISTINCT id_sender FROM messages WHERE id_reciever = '%d');", id);
     sqlite3_get_table(db, querry, &result_table, &rows, &cols, NULL);
     if (rows > 0) {
         t_list *users_info = NULL;
         for (int i = 0; i < rows; i++) {
             char *user_json = malloc(38 + LOGIN_SIZE + USERNAME_SIZE + sizeof(int));
-            sprintf(user_json, "{\"id\":\"%s\",\"name\":\"%s\",\"login\":\"%s\"}\n", result_table[(i + 1) * cols + 0], result_table[(i + 1) * cols + 1], result_table[(i + 1) * cols + 2]);
+            sprintf(user_json, "{\"id\":\"%s\",\"name\":\"%s\",\"login\":\"%s\"}\n", result_table[(i + 1) * cols], result_table[(i + 1) * cols + 1], result_table[(i + 1) * cols + 2]);
             mx_push_back(&users_info, strdup(user_json));
             strdel(&user_json);
         }
@@ -83,10 +84,6 @@ static void handleChatsUpdate(int id) {
     strdel(&querry);
 }
 
-// void createChatWithusers(int id, int sid) { // TODO
-//     (void) id;
-//     (void) sid;
-// }
 
 static void handleAddUser(char *data) {
     int *id = malloc(sizeof(int));
@@ -239,6 +236,7 @@ int main() {
 
     signal(SIGINT, signal_handler);
 #pragma endregion sockets_init
+    register_user("MemoMmm", "memo", "qwerty");
 
     while (dyad_getStreamCount() > 0) {
         dyad_update();
