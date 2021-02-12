@@ -1,19 +1,21 @@
 #include "client.h"
 
-void uchat_recieve_text_message(guint id, gchar *message) {
+void uchat_recieve_sticker_message(guint id, gchar *sticker) {
     GtkWidget *recieved_message_box;
-    GtkWidget *recieved_message_label;
+    GtkWidget *recieved_message_image;
     GtkWidget *recieved_time_stamp_label;
 
     recieved_message_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     gtk_widget_set_name(recieved_message_box, "recieved_message_box");
     gtk_widget_set_halign(recieved_message_box, GTK_ALIGN_START);
 
-    recieved_message_label = gtk_label_new(message);
-    gtk_widget_set_name(recieved_message_label, "recieved_message_label");
-    gtk_widget_set_halign(recieved_message_label, GTK_ALIGN_START);
-    gtk_label_set_line_wrap(GTK_LABEL(recieved_message_label), TRUE);
-    gtk_label_set_selectable(GTK_LABEL(recieved_message_label), TRUE);
+    gchar *sticker_path = strdup("resource/images/stickers/");
+    sticker_path = strjoin(sticker_path, sticker);
+    sticker_path = strjoin(sticker_path, ".png");
+
+    recieved_message_image = gtk_image_new_from_pixbuf(gdk_pixbuf_new_from_file_at_scale(sticker_path, 52, 52, FALSE, NULL));
+    gtk_widget_set_name(recieved_message_image, "recieved_message_image");
+    gtk_widget_set_halign(recieved_message_image, GTK_ALIGN_START);
 
     time_t timer = time(NULL);
     struct tm *time_info = localtime(&timer);
@@ -24,7 +26,7 @@ void uchat_recieve_text_message(guint id, gchar *message) {
     gtk_widget_set_name(recieved_time_stamp_label, "recieved_time_stamp_label");
     gtk_widget_set_halign(recieved_time_stamp_label, GTK_ALIGN_START);
 
-    gtk_box_pack_start(GTK_BOX(recieved_message_box), recieved_message_label, FALSE, FALSE, 0);
+    gtk_box_pack_start(GTK_BOX(recieved_message_box), recieved_message_image, FALSE, FALSE, 0);
     gtk_box_pack_start(GTK_BOX(recieved_message_box), recieved_time_stamp_label, FALSE, FALSE, 0);
 
     GList *chats = gtk_container_get_children(GTK_CONTAINER(main_struct->mainbar_scrolled_chat_box));
@@ -55,10 +57,11 @@ void uchat_recieve_text_message(guint id, gchar *message) {
 
     g_list_free(g_steal_pointer(&chats));
 
-    g_print("Recieved from %s(%d) to %s(%d) text message: %s\n", main_struct->current->username, main_struct->current->id, main_struct->auth->username, main_struct->auth->id, message);
+    g_print("Recieved from %s(%d) to %s(%d) sticker message: %s\n", main_struct->current->username, main_struct->current->id, main_struct->auth->username, main_struct->auth->id, sticker);
 
     if (!strcmp(main_struct->current->login, user_list_get_user_login_by_id(main_struct->user_list, id))) {
         pthread_t thread;
         pthread_create(&thread, NULL, uchat_mainbar_chat_scroll_thread, NULL);
     }
 }
+

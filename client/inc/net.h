@@ -47,6 +47,8 @@ void *serverInit(void *argument);
 void addUser(char *login);
 void connectToServer();
 void sendTextMessage(size_t id, char *message);
+void sendStickerMessage(size_t id, char *sticker);
+void sendFileMessage(size_t id, char *filename, char *binary_content);
 
 int codepoint_len(const uint32_t cp); /* len of associated utf-8 char */
 int utf8_len(const char ch);          /* len of utf-8 encoded char */

@@ -58,8 +58,10 @@ void uchat_send_sticker_message(GtkWidget *button, t_main_struct *main_struct) {
     g_list_free(g_steal_pointer(&fixed_inner));
     g_list_free(g_steal_pointer(&fixed_child));
 
-    // g_print("From %s to %s sticker message: %s\n", main_struct->auth->username, gtk_label_get_text(GTK_LABEL(main_struct->sidebar_currnet_chat_username_label)), stickername);
     g_print("From %s(%d) to %s(%d) sticker message: %s\n", main_struct->auth->username, main_struct->auth->id, main_struct->current->username, main_struct->current->id, stickername);
+
+    // TODO: uncomment
+    // sendStickerMessage(main_struct->current->id, stickername);
 
     uchat_mainbar_chat_scroll(main_struct);
 

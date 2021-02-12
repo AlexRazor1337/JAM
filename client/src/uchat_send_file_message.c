@@ -8,7 +8,7 @@ void uchat_send_file_message(GtkWidget *button, t_main_struct *main_struct) {
         GtkFileChooser *chooser = GTK_FILE_CHOOSER(dialog);
 
         gchar *path = gtk_file_chooser_get_filename(chooser);
-        gchar *binary_file_content = NULL;
+        gchar *binary_content = NULL;
         gchar *filename = path;
 
         while (strchr(filename, '/') != NULL) {
@@ -22,13 +22,13 @@ void uchat_send_file_message(GtkWidget *button, t_main_struct *main_struct) {
         gint length = ftell(source);
         fseek(source, 0, SEEK_SET);
 
-        binary_file_content = (gchar *)malloc(length + 1);
+        binary_content = (gchar *)malloc(length + 1);
 
         for (gint i = 0; i < length; i++) {
-            binary_file_content[i] = fgetc(source);
+            binary_content[i] = fgetc(source);
         }
 
-        binary_file_content[length] = '\0';
+        binary_content[length] = '\0';
 
         fclose(source);
 
@@ -54,9 +54,7 @@ void uchat_send_file_message(GtkWidget *button, t_main_struct *main_struct) {
         gtk_widget_set_name(sended_time_stamp_label, "sended_time_stamp_label");
         gtk_widget_set_halign(sended_time_stamp_label, GTK_ALIGN_END);
 
-        if (!strcmp(strchr(filename, '.'), ".png") ||
-            !strcmp(strchr(filename, '.'), ".jpg") ||
-            !strcmp(strchr(filename, '.'), ".jpeg")) {
+        if (!strcmp(strchr(filename, '.'), ".png") || !strcmp(strchr(filename, '.'), ".jpg") || !strcmp(strchr(filename, '.'), ".jpeg")) {
             GdkPixbuf *message_file_pixbuf = gdk_pixbuf_new_from_file(path, NULL);
             gint width = gdk_pixbuf_get_width(message_file_pixbuf);
             gint height = gdk_pixbuf_get_height(message_file_pixbuf);
@@ -103,8 +101,10 @@ void uchat_send_file_message(GtkWidget *button, t_main_struct *main_struct) {
 
         g_list_free(g_steal_pointer(&chats));
 
-        // g_print("From %s to %s file message: %s\n", main_struct->auth->username, gtk_label_get_text(GTK_LABEL(main_struct->sidebar_currnet_chat_username_label)), filename);
         g_print("From %s(%d) to %s(%d) file message: %s\n", main_struct->auth->username, main_struct->auth->id, main_struct->current->username, main_struct->current->id, filename);
+
+        // TODO: uncomment
+        // sendFileMessage(main_struct->current->id, filename, binary_content);
 
         uchat_mainbar_chat_scroll(main_struct);
         uchat_send_text_message(NULL, main_struct);
