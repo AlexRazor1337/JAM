@@ -45,6 +45,8 @@ typedef struct s_main_struct {
     t_user_list *user_list;
     t_settings *settings;
 
+    t_user *current;
+
     GtkCssProvider *provider;
 
     GtkWidget *uchat_window;

@@ -50,4 +50,6 @@ void uchat_sidebar_chat_self_new(t_main_struct *main_struct) {
     main_struct->sidebar_currnet_chat_username_label = sidebar_self_chat_username_label;
     main_struct->sidebar_currnet_chat_login_label = sidebar_self_chat_login_label;
     main_struct->sidebar_currnet_chat_status = sidebar_self_chat_status;
+
+    main_struct->current = user_new(main_struct->auth->id, main_struct->auth->login, main_struct->auth->username);
 }

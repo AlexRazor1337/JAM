@@ -14,6 +14,9 @@ void uchat_settings_close_with_save(GtkWidget *button, t_main_struct *main_struc
 
             if (!strcmp(main_struct->auth->login, (gchar *)gtk_label_get_text(GTK_LABEL(main_struct->header_user_login_label)))) {
                 gtk_label_set_text(GTK_LABEL(main_struct->header_user_username_label), main_struct->auth->username);
+
+                strdel(&main_struct->current->username);
+                main_struct->current->username = strdup((gchar *)gtk_entry_get_text(GTK_ENTRY(main_struct->settings->username_entry)));
             }
 
             // update username on server
@@ -45,6 +48,9 @@ void uchat_settings_close_with_save(GtkWidget *button, t_main_struct *main_struc
 
         if (!strcmp(main_struct->auth->login, (gchar *)gtk_label_get_text(GTK_LABEL(main_struct->header_user_login_label)))) {
             gtk_image_set_from_pixbuf(GTK_IMAGE(main_struct->header_user_image), gdk_pixbuf_new_from_file_at_scale(main_struct->auth->image, 50, 50, FALSE, NULL));
+        
+            strdel(&main_struct->current->image);
+            main_struct->current->image = strdup(main_struct->settings->image);
         }
 
         // update image on server
