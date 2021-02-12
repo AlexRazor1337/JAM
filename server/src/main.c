@@ -34,19 +34,19 @@ static void handleMsg(char *data) {
         sprintf(querry, "INSERT INTO messages(id_sender, id_reciever, text, timestamp) VALUES('%d', '%s', '%s', '%ld');", *id, reciever_id, text, time(NULL));
         db_exec(db, querry, NULL);
         strdel(&querry);
+        t_connection *reciever = find_node_uid(atoi(reciever_id), connections);
+        if (reciever) dyad_writef(reciever->stream, "/@%d/msg|%b", find_node_uid(*id, connections)->uid, text, strlen(text));
+       
+        // char **result_table = NULL;
+        // int rows, cols;
+        // querry = malloc(47 + sizeof(int));
+        // sprintf(querry, "SELECT id FROM users WHERE chat_id='%s'", reciever_id);
+        // sqlite3_get_table(db, querry, &result_table, &rows, &cols, NULL);
+        //for (int i = 0; i < cols * rows; i++) {
+        // }
 
-        char **result_table = NULL;
-        int rows, cols;
-        querry = malloc(47 + sizeof(int));
-        sprintf(querry, "SELECT id FROM participants WHERE chat_id='%s'", reciever_id);
-        sqlite3_get_table(db, querry, &result_table, &rows, &cols, NULL);
-        for (int i = 0; i < cols * rows; i++) {
-            t_connection *reciever = find_node_uid(atoi(result_table[i + cols]), connections);
-            if (reciever) dyad_writef(reciever->stream, "/@%d/msg|%b", find_node_uid(*id, connections)->uid, text, strlen(text));
-        }
-
-        sqlite3_free_table(result_table);
-        strdel(&querry);
+        //sqlite3_free_table(result_table);
+        //strdel(&querry);
     }
 
     free(id);
@@ -60,7 +60,7 @@ static void handleChatsUpdate(int id) {
     char **result_table = NULL;
     int rows, cols;
     char *querry = malloc(238 + sizeof(int) * 2);
-    sprintf(querry, "SELECT id, name, login, last_visit FROM users WHERE id IN (SELECT DISTINCT id_sender FROM messages WHERE id_reciever = '%d');", id);
+    sprintf(querry, "SELECT id, name, login, last_visit FROM users WHERE id != '%d' AND id IN (SELECT DISTINCT id_sender FROM messages WHERE id_reciever = '%d' UNION SELECT DISTINCT id_reciever FROM messages WHERE id_sender = '%d');", id, id, id);
     sqlite3_get_table(db, querry, &result_table, &rows, &cols, NULL);
     if (rows > 0) {
         t_list *users_info = NULL;

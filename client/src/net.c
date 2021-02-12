@@ -3,9 +3,9 @@ t_client client = {0};
 dyad_Stream *server_stream;
 t_connect_data *connect_data;
 
-void send_message(char *id, char *text) {
-    printf("text: %s\n", text);
-    dyad_writef(server_stream, "/@%d/msg|%s|%b", client.uid, id, text, strlen(text));
+void sendTextMessage(size_t id, char *message) {
+    printf("message: %s\n", message);
+    dyad_writef(server_stream, "/@%d/msg|%d|%b", client.uid, id, message, strlen(message));
 }
 
 void onDataPostAuth(dyad_Event *e) {  // Anything, when user is AUTH'ed

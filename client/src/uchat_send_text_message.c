@@ -46,6 +46,8 @@ void uchat_send_text_message(GtkWidget *button, t_main_struct *main_struct) {
         // g_print("From %s to %s text message: %s\n", main_struct->auth->username, gtk_label_get_text(GTK_LABEL(main_struct->sidebar_currnet_chat_username_label)), message);
         g_print("From %s(%d) to %s(%d) text message: %s\n", main_struct->auth->username, main_struct->auth->id, main_struct->current->username, main_struct->current->id, message);
 
+        sendTextMessage(main_struct->current->id, message);
+
         gtk_entry_set_text(GTK_ENTRY(main_struct->mainbar_input_entry), "");
 
         uchat_mainbar_chat_scroll(main_struct);

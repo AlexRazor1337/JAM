@@ -50,8 +50,6 @@ void sign_in_submit(GtkWidget *button, t_main_struct *main_struct) {
 
                         strdel(&client.json_data);
 
-                        user_list_print(main_struct->user_list);
-
                         uchat(NULL, main_struct);
                     } else {
                         gtk_widget_show_all(main_struct->auth_is_failed);

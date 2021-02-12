@@ -46,6 +46,7 @@ extern dyad_Stream *server_stream;
 void *serverInit(void *argument);
 void addUser(char *login);
 void connectToServer();
+void sendTextMessage(size_t id, char *message);
 
 int codepoint_len(const uint32_t cp); /* len of associated utf-8 char */
 int utf8_len(const char ch);          /* len of utf-8 encoded char */
