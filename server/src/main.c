@@ -207,6 +207,7 @@ static void check_disconnected_client() {
             con = NULL;
             mx_pop_index(&connections, index);
         }
+        index++;
         carret = carret->next;
     }
 }
