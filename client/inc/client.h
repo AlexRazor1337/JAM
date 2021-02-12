@@ -165,6 +165,7 @@ void uchat_sidebar_chat_new(t_main_struct *main_struct, t_user *current);
 void uchat_sidebar_chat_self_new(t_main_struct *main_struct);
 void uchat_mainbar_chat_new(t_main_struct *main_struct, t_user *current);
 void uchat_mainbar_chat_scroll(t_main_struct *main_struct);
+void *uchat_mainbar_chat_scroll_thread();
 void uchat_stickerbar_sticker_new(t_main_struct *main_struct, gint column, gint row);
 void uchat_settings_open(GtkWidget *button, t_main_struct *main_struct);
 void uchat_settings_close(GtkWidget *button, t_main_struct *main_struct);
@@ -180,6 +181,7 @@ void uchat_settings_toggle_password_visibility(GtkWidget *button, t_main_struct 
 void uchat_search_user_open(GtkWidget *button, t_main_struct *main_struct);
 void uchat_search_user_close(GtkWidget *button, t_main_struct *main_struct);
 void uchat_search_user_add(GtkWidget *button, t_main_struct *main_struct);
+void uchat_seach_user_add_network();
 void uchat_show_current_chat(t_main_struct *main_struct);
 void uchat_switch_current_chat(GtkWidget *button, t_main_struct *main_struct);
 void uchat_switch_mainbar_size(GtkWidget *button, t_main_struct *main_struct);

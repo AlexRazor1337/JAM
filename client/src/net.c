@@ -20,6 +20,7 @@ void onDataPostAuth(dyad_Event *e) {  // Anything, when user is AUTH'ed
         // strdel(&client.json_data);
         client.json_data = malloc(strlen(e->data));
         sscanf(e->data, "/@adduser|%[^\r]", client.json_data);
+        uchat_seach_user_add_network();
     } else if (strncmp("msg", action, 3) == 0) {
         char *text = malloc(strlen(e->data));
         int *id = malloc(sizeof(int));

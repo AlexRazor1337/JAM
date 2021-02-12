@@ -26,7 +26,11 @@ void uchat_recieve_text_message(guint id, gchar *message) {
 
             gtk_box_pack_start(GTK_BOX(inner_data->data), resieved_message_box, FALSE, FALSE, 0);
 
-            gtk_widget_show_all(chats->data);
+            system("afplay resource/audio/recieved-sound.mp3");
+
+            if (!strcmp(main_struct->current->login, user_list_get_user_login_by_id(main_struct->user_list, id))) {
+                gtk_widget_show_all(chats->data);
+            }
 
             g_list_free(g_steal_pointer(&inner_data));
 
@@ -43,8 +47,7 @@ void uchat_recieve_text_message(guint id, gchar *message) {
     g_print("Recieved from %s(%d) to %s(%d) text message: %s\n", main_struct->current->username, main_struct->current->id, main_struct->auth->username, main_struct->auth->id, message);
 
     if (!strcmp(main_struct->current->login, user_list_get_user_login_by_id(main_struct->user_list, id))) {
-        uchat_mainbar_chat_scroll(main_struct);
-        uchat_mainbar_chat_scroll(main_struct);
-        uchat_mainbar_chat_scroll(main_struct);
+        pthread_t thread;
+        pthread_create(&thread, NULL, uchat_mainbar_chat_scroll_thread, NULL);
     }
 }
