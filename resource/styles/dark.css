@@ -201,11 +201,13 @@ overshoot {
   opacity: 0;
 }
 
-#sended_message_box {
+#sended_message_box,
+#resieved_message_box {
   margin: 7px;
 }
 
-#sended_message_label {
+#sended_message_label,
+#resieved_message_label {
   box-shadow: -3px -3px 5px 1px #000, 3px 3px 5px 1px rgba(107, 118, 131, 0.25);
   background-color: #08090B;
   border-radius: 15px;

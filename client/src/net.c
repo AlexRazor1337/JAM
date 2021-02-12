@@ -21,9 +21,13 @@ void onDataPostAuth(dyad_Event *e) {  // Anything, when user is AUTH'ed
         client.json_data = malloc(strlen(e->data));
         sscanf(e->data, "/@adduser|%[^\r]", client.json_data);
     } else if (strncmp("msg", action, 3) == 0) {
-        printf("recvm \n");
+        char *text = malloc(strlen(e->data));
+        int *id = malloc(sizeof(int));
+        sscanf(e->data, "/@%d/msg|%[^\r]", id, text);
+        uchat_recieve_text_message(*id, text);
     }
     free(action);
+    action = NULL;
 }
 
 void addUser(char *login) {

@@ -123,6 +123,9 @@ typedef struct s_main_struct {
     GtkWidget *profile_image_set_image;
 } t_main_struct;
 
+// Global
+extern t_main_struct *main_struct;
+
 // Init
 t_auth *init_auth();
 gchar *init_user_image(gchar *login);
@@ -154,6 +157,7 @@ void user_list_print(t_user_list *user_list);
 guint user_list_size(t_user_list *user_list);
 void user_list_parse_from_json(t_user_list **user_list, const gchar *str);
 void user_list_parse_from_json_array(t_user_list **user_list, const gchar *str);
+gchar *user_list_get_user_login_by_id(t_user_list *user_list, guint id);
 
 // Uchat
 void uchat(GtkWidget *button, t_main_struct *main_struct);
@@ -182,6 +186,7 @@ void uchat_switch_mainbar_size(GtkWidget *button, t_main_struct *main_struct);
 void uchat_send_text_message(GtkWidget *button, t_main_struct *main_struct);
 void uchat_send_sticker_message(GtkWidget *button, t_main_struct *main_struct);
 void uchat_send_file_message(GtkWidget *button, t_main_struct *main_struct);
+void uchat_recieve_text_message(guint id, gchar *message);
 
 // Jamconfig
 gchar *jamconfig_parse_json(t_main_struct *main_struct);
