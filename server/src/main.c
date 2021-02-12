@@ -36,17 +36,6 @@ static void handleMsg(char *data) {
         strdel(&querry);
         t_connection *reciever = find_node_uid(atoi(reciever_id), connections);
         if (reciever) dyad_writef(reciever->stream, "/@%d/msg|%b", find_node_uid(*id, connections)->uid, text, strlen(text));
-       
-        // char **result_table = NULL;
-        // int rows, cols;
-        // querry = malloc(47 + sizeof(int));
-        // sprintf(querry, "SELECT id FROM users WHERE chat_id='%s'", reciever_id);
-        // sqlite3_get_table(db, querry, &result_table, &rows, &cols, NULL);
-        //for (int i = 0; i < cols * rows; i++) {
-        // }
-
-        //sqlite3_free_table(result_table);
-        //strdel(&querry);
     }
 
     free(id);
@@ -85,6 +74,27 @@ static void handleChatsUpdate(int id) {
 }
 
 
+void reverseAddUser(int asker_id, char *id) {
+    char **result_table = NULL;
+    int rows, cols;
+    char *querry = malloc(66 + LOGIN_SIZE);
+    sprintf(querry, "SELECT id, name, login, last_visit FROM users WHERE id = '%d';", asker_id);
+    sqlite3_get_table(db, querry, &result_table, &rows, &cols, NULL);
+    if (rows > 0) {
+        char *user_json = malloc(256);
+        sprintf(user_json, "{\"id\":\"%s\",\"name\":\"%s\",\"login\":\"%s\"}\n", result_table[1 * cols + 0], result_table[1 * cols + 1], result_table[1 * cols + 2]);
+
+        t_connection *client = find_node_uid(atoi(id), connections);
+        if (client) dyad_writef(client->stream, "/@adduser|%b", user_json, strlen(user_json));
+        strdel(&user_json);
+    } else {
+        t_connection *client = find_node_uid(atoi(id), connections);
+        if (client) dyad_writef(client->stream, "/@adduser|{}");
+    }
+
+    sqlite3_free_table(result_table);
+}
+
 static void handleAddUser(char *data) {
     int *id = malloc(sizeof(int));
     char *login = malloc(LOGIN_SIZE);
@@ -98,6 +108,7 @@ static void handleAddUser(char *data) {
     if (rows > 0) {
         char *user_json = malloc(256);
         sprintf(user_json, "{\"id\":\"%s\",\"name\":\"%s\",\"login\":\"%s\"}\n", result_table[1 * cols + 0], result_table[1 * cols + 1], result_table[1 * cols + 2]);
+        reverseAddUser(*id, result_table[1 * cols]);
 
         t_connection *client = find_node_uid(*id, connections);
         if (client) dyad_writef(client->stream, "/@adduser|%b", user_json, strlen(user_json));
@@ -196,6 +207,7 @@ static void check_disconnected_client() {
             con = NULL;
             mx_pop_index(&connections, index);
         }
+        index++;
         carret = carret->next;
     }
 }
