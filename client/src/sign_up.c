@@ -93,7 +93,7 @@ void sign_up(GtkWidget *button, t_main_struct *main_struct) {
     gtk_widget_set_name(username_entry, "username_entry");
     gtk_widget_set_size_request(username_entry, 400, 40);
     gtk_entry_set_placeholder_text(GTK_ENTRY(username_entry), "USERNAME");
-    gtk_entry_set_max_length(GTK_ENTRY(username_entry), 16);
+    gtk_entry_set_max_length(GTK_ENTRY(username_entry), 32);
 
     // username is empty -> error label
     username_is_empty = gtk_label_new("USERNAME INPUT IS EMPTY");
@@ -114,7 +114,7 @@ void sign_up(GtkWidget *button, t_main_struct *main_struct) {
     gtk_widget_set_name(password_entry, "password_entry");
     gtk_widget_set_size_request(password_entry, 400, 40);
     gtk_entry_set_placeholder_text(GTK_ENTRY(password_entry), "PASSWORD");
-    gtk_entry_set_max_length(GTK_ENTRY(password_entry), 16);
+    gtk_entry_set_max_length(GTK_ENTRY(password_entry), 32);
     gtk_entry_set_visibility(GTK_ENTRY(password_entry), FALSE);
 
     // username is empty -> error label
@@ -136,7 +136,7 @@ void sign_up(GtkWidget *button, t_main_struct *main_struct) {
     gtk_widget_set_name(password_repeat_entry, "password_repeat_entry");
     gtk_widget_set_size_request(password_repeat_entry, 400, 40);
     gtk_entry_set_placeholder_text(GTK_ENTRY(password_repeat_entry), "REPEAT PASSWORD");
-    gtk_entry_set_max_length(GTK_ENTRY(password_repeat_entry), 16);
+    gtk_entry_set_max_length(GTK_ENTRY(password_repeat_entry), 32);
     gtk_entry_set_visibility(GTK_ENTRY(password_repeat_entry), FALSE);
 
     password_repeat_is_not_identical = gtk_label_new("PASSWORDS ARE NOT IDENTICAL");

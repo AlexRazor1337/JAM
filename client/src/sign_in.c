@@ -84,7 +84,7 @@ void sign_in(GtkWidget *button, t_main_struct *main_struct) {
     gtk_widget_set_name(password_entry, "password_entry");
     gtk_widget_set_size_request(password_entry, 400, 40);
     gtk_entry_set_placeholder_text(GTK_ENTRY(password_entry), "PASSWORD");
-    gtk_entry_set_max_length(GTK_ENTRY(password_entry), 16);
+    gtk_entry_set_max_length(GTK_ENTRY(password_entry), 32);
     gtk_entry_set_visibility(GTK_ENTRY(password_entry), FALSE);
 
     // username is empty -> error label
