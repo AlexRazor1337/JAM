@@ -4,7 +4,7 @@
 #include <gtk/gtk.h>
 #include <json-c/json.h>
 #include <string.h>
-
+#include <time.h>
 #include "net.h"
 
 typedef struct s_auth {

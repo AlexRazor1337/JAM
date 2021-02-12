@@ -202,18 +202,25 @@ overshoot {
 }
 
 #sended_message_box,
-#resieved_message_box {
+#recieved_message_box {
   margin: 7px;
 }
 
 #sended_message_label,
-#resieved_message_label {
+#recieved_message_label {
   box-shadow: 3px 3px 5px 1px #141D34, -3px -3px 5px 1px rgba(0, 0, 0, 0.25);;
   background-color: #141D34;
   border-radius: 15px;
-  padding: 10px 15px;
+  padding: 10px;
   color: #fff;
   font-size: 16px;
+}
+
+#sended_time_stamp_label,
+#recieved_time_stamp_label {
+  color: #fff;
+  font-size: 10px;
+  padding: 5px 10px;
 }
 
 #mainbar_input_box {
