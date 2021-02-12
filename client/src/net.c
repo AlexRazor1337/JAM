@@ -10,6 +10,8 @@ void sendTextMessage(size_t id, char *message) {
 
 void onDataPostAuth(dyad_Event *e) {  // Anything, when user is AUTH'ed
     printf("Post Auth: %s\n", e->data);
+    char *action = malloc(32);
+    sscanf(e->data, "/@%*d/%s|", action);
     if (strncmp("/@updmsg", e->data, 8) == 0) {
         // strdel(&client.json_data);
         client.json_data = malloc(strlen(e->data));
@@ -18,7 +20,10 @@ void onDataPostAuth(dyad_Event *e) {  // Anything, when user is AUTH'ed
         // strdel(&client.json_data);
         client.json_data = malloc(strlen(e->data));
         sscanf(e->data, "/@adduser|%[^\r]", client.json_data);
+    } else if (strncmp("msg", action, 3) == 0) {
+        printf("recvm \n");
     }
+    free(action);
 }
 
 void addUser(char *login) {
