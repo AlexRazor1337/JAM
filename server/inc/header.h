@@ -19,6 +19,7 @@
 #include <sys/types.h>
 #include <time.h>
 #include <unistd.h>
+#include <syslog.h>
 
 #include "../../libs/dyad/dyad.h"
 #include "../../libs/list/list.h"
@@ -47,7 +48,7 @@ bool is_dir_exists(char *name);
 char *jsonlist_from_jsones(vec_str_t v, int bsize);
 t_connection *create_connection(dyad_Stream *stream, t_list *connections);
 void strdel(char **str);
-
+void daemonize();
 int db_exec(sqlite3 *db, char *querry, char **result);
 
 char *mx_itoa(int n);

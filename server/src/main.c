@@ -273,6 +273,8 @@ static void check_disconnected_client() {
 
 
 int main(int argc, char *argv[]) {
+    //TODO uncomment
+    //daemonize();
     if (argc < 2) {
         write(STDERR_FILENO, "usage: ./uchat_server port\n", 28);
         exit(EXIT_FAILURE);
@@ -335,6 +337,5 @@ void signal_handler(int signal_number) {
     exit(EXIT_SUCCESS);
 }
 
-//TODO 1. Daemonize
 //TODO 2. Add history loading
 //TODO 3. Add files handling

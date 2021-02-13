@@ -103,3 +103,23 @@ void strdel(char **str) {
     free(*str);
     *str = NULL;
 }
+
+void daemonize() {
+    pid_t pid;
+
+    pid = fork();
+    if (pid < 0) exit(EXIT_FAILURE);
+    if (pid > 0) exit(EXIT_SUCCESS);
+    if (setsid() < 0) exit(EXIT_FAILURE);
+
+    signal(SIGCHLD, SIG_IGN);
+    signal(SIGHUP, SIG_IGN);
+
+    pid = fork();
+    if (pid < 0) exit(EXIT_FAILURE);
+    printf("%d\n", pid);
+    if (pid > 0) exit(EXIT_SUCCESS);
+    umask(0);
+
+    openlog ("uchat_server", LOG_PID, LOG_DAEMON);
+}
