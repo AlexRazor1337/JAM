@@ -56,3 +56,6 @@ server_data/
 .vscode/settings.json
 .DS_Store
 
+
+uchat
+uchat_server

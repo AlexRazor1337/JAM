@@ -56,7 +56,7 @@ void uchat_recieve_file_message(guint id, gchar *filename, gchar *path) {
 
             gtk_box_pack_start(GTK_BOX(inner_data->data), recieved_message_box, FALSE, FALSE, 0);
 
-            system("afplay -v 100 resource/audio/recieved-sound.mp3");
+            system("afplay resource/audio/receive-file.mp3");
 
             if (!strcmp(main_struct->current->login, user_list_get_user_login_by_id(main_struct->user_list, id))) {
                 gtk_widget_show_all(chats->data);
