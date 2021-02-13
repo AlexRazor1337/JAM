@@ -158,7 +158,7 @@ void sign_up(GtkWidget *button, t_main_struct *main_struct) {
     gtk_widget_set_size_request(unsubmit_button, 193, 40);
 
     // submit_button button
-    submit_button = gtk_button_new_with_label("SIGN IN");
+    submit_button = gtk_button_new_with_label("SIGN UP");
     gtk_widget_set_name(submit_button, "submit_button");
     gtk_widget_set_size_request(submit_button, 193, 40);
 
