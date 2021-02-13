@@ -298,6 +298,8 @@ int main(int argc, char *argv[]) {
     dyad_listen(serv, atoi(argv[1]));
 
     signal(SIGINT, signal_handler);
+    signal(SIGTERM, signal_handler);
+
 #pragma endregion sockets_init
 //TODO Delete
     register_user("MemoMmm", "memo", "qwerty");

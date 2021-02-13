@@ -24,9 +24,9 @@
 #include "../../libs/list/list.h"
 #include "../../libs/sqlite/sqlite3.h"
 #include "../../libs/vec/vec.h"
+#include "../../libs/aes/aes.h"
 
 #define SERVER_PORT 8000
-#define JSON_OP_SIZE 1024
 #define LOGIN_SIZE 16
 #define PASSWORD_SIZE 32
 #define USERNAME_SIZE 32
@@ -38,7 +38,6 @@ typedef struct s_connection {
     dyad_Stream *stream;
 } t_connection;
 
-/* Signal handler to handle SIGTERM and SIGINT signals. */
 void signal_handler(int signal_number);
 
 int generate_unique_id(t_list *connections);
@@ -52,9 +51,4 @@ void strdel(char **str);
 int db_exec(sqlite3 *db, char *querry, char **result);
 
 char *mx_itoa(int n);
-int codepoint_len(const uint32_t cp); /* len of associated utf-8 char */
-int utf8_len(const char ch);          /* len of utf-8 encoded char */
-
-char *to_utf8(const uint32_t cp);
-uint32_t to_cp(const char chr[4]);
 #endif  //JAM_HEADER_H

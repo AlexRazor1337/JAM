@@ -17,6 +17,7 @@
 
 #include "../../libs/dyad/dyad.h"
 #include "../../libs/list/list.h"
+#include "../../libs/aes/aes.h"
 
 #define SERVER_NAME_LEN_MAX 255
 #define SERVER_PORT 8000
