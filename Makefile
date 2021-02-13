@@ -11,7 +11,7 @@ JSON_FLAGS = `pkg-config --cflags --libs json-c`
 
 CLIENT_INC = client/inc/
 
-all: clean install  
+all: clean install
 
 install: uchat_server uchat
 

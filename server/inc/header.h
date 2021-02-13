@@ -23,6 +23,7 @@
 #include "../../libs/dyad/dyad.h"
 #include "../../libs/list/list.h"
 #include "../../libs/sqlite/sqlite3.h"
+#include "../../libs/vec/vec.h"
 
 #define SERVER_PORT 8000
 #define JSON_OP_SIZE 1024
@@ -44,7 +45,7 @@ int generate_unique_id(t_list *connections);
 t_connection *find_node(int id, t_list *connections);
 t_connection *find_node_uid(int uid, t_list *connections);
 bool is_dir_exists(char *name);
-char *jsonlist_from_jsones(t_list *list, int bsize);
+char *jsonlist_from_jsones(vec_str_t v, int bsize);
 t_connection *create_connection(dyad_Stream *stream, t_list *connections);
 void strdel(char **str);
 

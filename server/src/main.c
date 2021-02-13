@@ -14,21 +14,45 @@ static void register_user(char *name, char *login, char *password) {
     strdel(&str);
 }
 
-
 char *constructMsgJson(int sender_id, char *text, unsigned int timestamp, int type) {
-    (void)timestamp;
+    (void) timestamp;
     // TODO Finish this
     char *result = NULL;
     result = malloc(sizeof(int) * 3 + strlen(text) + 128);
-    sprintf(result, "{\"sender\":\"%d\",\"type\":\"%d\", \"data\":\"%s\"}", sender_id, type, text);
-    // if (type == 0) { // TEXT MSG
-    //     result = malloc(sizeof(int) * 2 + strlen(type) + strlen(text) + 128);
-    //     sprintf(result, "{\"sender\":\"%d\",\"type\":\"%s\", \"data\":\"%s\"}", sender_id, type, text);
-    // } else if (type ==)
+    sprintf(result, "{\"sender\":\"%d\",\"type\":\"%d\",\"data\":\"%s\"}", sender_id, type, text);
 
     return result;
 }
 
+static void loadMsgHistory(int id) {
+    char **result_table = NULL;
+    int rows, cols;
+    char *querry = malloc(96 + sizeof(int));
+    sprintf(querry, "SELECT id_sender, text, timestamp, type FROM messages WHERE id_reciever = '%d' or id_sender = '%d';", id, id);
+    sqlite3_get_table(db, querry, &result_table, &rows, &cols, NULL);
+    if (rows > 0) {
+        vec_str_t v;
+        vec_init(&v);
+        for (int i = 0; i < rows; i++){
+            char *user_json = constructMsgJson(atoi(result_table[(i + 1) * cols]), result_table[(i + 1) * cols + 1], atol(result_table[(i + 1) * cols + 2]), atoi(result_table[(i + 1) * cols + 3]));
+            vec_push(&v, user_json);
+        }
+
+        // t_list *carret = messages;
+        // while (carret) {
+        //     free(carret->data);
+        //     carret = carret->next;
+        // }
+
+        char *json = jsonlist_from_jsones(v, (sizeof(int) * 4 + strlen(result_table[1 * cols + 1]) + 128) * v.length);
+        printf("MSG HIST %s\n", json);
+        t_connection *client = find_node_uid(id, connections);
+        if (client) dyad_writef(client->stream, "/@loadmsg|%b", json, strlen(json));
+        strdel(&json);
+    }
+
+    sqlite3_free_table(result_table);
+}
 
 static void handleMsg(char *msg) {
     int *id = malloc(sizeof(int));
@@ -57,22 +81,23 @@ static void handleMsg(char *msg) {
 }
 
 
-static void handleChatsUpdate(int id) {
+static void handleGetDialogsList(int id) {
     char **result_table = NULL;
     int rows, cols;
     char *querry = malloc(238 + sizeof(int) * 2);
     sprintf(querry, "SELECT id, name, login, last_visit FROM users WHERE id != '%d' AND id IN (SELECT DISTINCT id_sender FROM messages WHERE id_reciever = '%d' UNION SELECT DISTINCT id_reciever FROM messages WHERE id_sender = '%d');", id, id, id);
     sqlite3_get_table(db, querry, &result_table, &rows, &cols, NULL);
     if (rows > 0) {
-        t_list *users_info = NULL;
+        vec_str_t v;
+        vec_init(&v);
         for (int i = 0; i < rows; i++) {
             char *user_json = malloc(38 + LOGIN_SIZE + USERNAME_SIZE + sizeof(int));
             sprintf(user_json, "{\"id\":\"%s\",\"name\":\"%s\",\"login\":\"%s\"}\n", result_table[(i + 1) * cols], result_table[(i + 1) * cols + 1], result_table[(i + 1) * cols + 2]);
-            mx_push_back(&users_info, strdup(user_json));
+            vec_push(&v, strdup(user_json));
             strdel(&user_json);
         }
 
-        char *json = jsonlist_from_jsones(users_info, (38 + LOGIN_SIZE + USERNAME_SIZE + sizeof(int)) * mx_list_size(users_info));
+        char *json = jsonlist_from_jsones(v, (38 + LOGIN_SIZE + USERNAME_SIZE + sizeof(int)) * v.length);
         t_connection *client = find_node_uid(id, connections);
         if (client) dyad_writef(client->stream, "/@updmsg|%b", json, strlen(json));
         strdel(&json);
@@ -83,6 +108,8 @@ static void handleChatsUpdate(int id) {
 
     sqlite3_free_table(result_table);
     strdel(&querry);
+    dyad_update();
+    loadMsgHistory(id);
 }
 
 
@@ -143,7 +170,7 @@ static void postAuthData(dyad_Event *e) {
     sscanf(e->data, "/@%d/%[^|]|", id, action);
 
     if (strcmp(action, "msg") == 0) handleMsg(e->data);
-    else if (strcmp(action, "getchats") == 0) handleChatsUpdate(*id);
+    else if (strcmp(action, "getchats") == 0) handleGetDialogsList(*id);
     else if (strcmp(action, "adduser") == 0) handleAddUser(e->data);
     strdel(&action);
     free(id);
@@ -172,7 +199,7 @@ static void getAuthDetails(dyad_Event *e) {
         strdel(&check_querry);
     } else sscanf(e->data, "/@%d/authorize|%[^|]|%s", id, login, password);
 
-    //    sscanf("{\"temporal\":\"1\",\"login\":\"hello\",\"password\":\"pass\"}", "{\"temporal\":\"%d\",\"login\":\"%[^\"]\",\"password\":\"%[^\"]\'}", id, login, password);
+    // sscanf("{\"temporal\":\"1\",\"login\":\"hello\",\"password\":\"pass\"}", "{\"temporal\":\"%d\",\"login\":\"%[^\"]\",\"password\":\"%[^\"]\'}", id, login, password);
     char **result_table = NULL;
     int rows = 0, cols  = 0;
     sprintf(querry, "SELECT id, name FROM users WHERE login = '%s' AND password = '%s' LIMIT 1;", login, password); // TODO update visit
@@ -260,6 +287,7 @@ int main() {
 
     signal(SIGINT, signal_handler);
 #pragma endregion sockets_init
+//TODO Delete
     register_user("MemoMmm", "memo", "qwerty");
     register_user("Ayyyyy", "lmao", "qwerty");
     while (dyad_getStreamCount() > 0) {

@@ -29,9 +29,13 @@ void mx_push_back(t_list **list, void *data) {
         return;
     }
     t_list *temp = *list;
-    while (temp -> next)
+    while (temp -> next) {
         temp = temp -> next;
+    }
+
+
     temp -> next = mx_create_node(data);
+    printf("%s PUSH %s %s %s\n", "\x1B[31m", data, "\x1B[32m", temp -> next -> data);
 }
 
 void mx_push_front(t_list **list, void *data) {

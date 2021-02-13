@@ -60,35 +60,38 @@ char *mx_itoa(int n) { // doesn't support negative numbers
     return number;
 }
 
-char *jsonlist_from_jsones(t_list *list, int bsize) {
+char *jsonlist_from_jsones(vec_str_t v, int bsize) {
     char *final_json = malloc(bsize);
     char *temporal = malloc(bsize);
-
     char *cursor = temporal;
     char *cursor_2 = final_json;
-    if (mx_list_size(list) == 1) {
-        sprintf(final_json, "[%s]", (char *)list->data);
+    if (v.length == 1) {
+        sprintf(final_json, "[%s]", (char *)v.data[0]);
         free(temporal);
         return final_json;
     }
 
-    t_list *carret = list;
-    sprintf(final_json, "[%s", (char *)carret->data);
-    carret = carret->next;
-    while (carret) {
-        if (carret->next) {
-            sprintf(cursor, "%s,%s", cursor_2, (char *)carret->data);
-            free(cursor_2);
-            cursor_2 = malloc(bsize);
-            char *temp = cursor_2;
-            cursor_2 = cursor;
-            cursor = temp;
-        } else {
-            sprintf(cursor, "%s,%s]", cursor_2, (char *)carret->data);
-            free(cursor_2);
-            cursor_2 = NULL;
+
+    sprintf(final_json, "[%s", (char *)v.data[0]);
+    int i; char *val;
+    vec_foreach(&v, val, i) {
+        if (i > 0) {
+            if (i == v.length - 1) {
+                //printf("\x1B[0m%s | %s\n", cursor_2, (char *)v.data[i]);
+                sprintf(cursor, "%s,%s]", cursor_2, (char *)v.data[i]);
+                free(cursor_2);
+                cursor_2 = NULL;
+            } else {
+                //printf("\x1B[0m%s,%s\n", cursor_2, (char *)v.data[i]);
+                sprintf(cursor, "%s,%s", cursor_2, (char *)v.data[i]);
+                free(cursor_2);
+                cursor_2 = malloc(bsize);
+                char *temp = cursor_2;
+                cursor_2 = cursor;
+                cursor = temp;
+            }
         }
-        carret = carret->next;
+
     }
 
     return cursor;
