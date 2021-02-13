@@ -1,4 +1,5 @@
 #include "client.h"
+
 t_client client = {0};
 dyad_Stream *server_stream;
 t_connect_data *connect_data;
@@ -28,10 +29,6 @@ void onDataPostAuth(dyad_Event *e) {  // Anything, when user is AUTH'ed
         char *data = malloc(strlen(e->data));
         sscanf(e->data, "/@msg|%[^\r]", data);
 
-        //uchat_recieve_text_message(*id, data); // old version
-
-        //TODO: uncomment
-        // json contents in data
         json_object *json = json_tokener_parse(data);
         int type = 0;
 
@@ -41,17 +38,10 @@ void onDataPostAuth(dyad_Event *e) {  // Anything, when user is AUTH'ed
                 break;
             }
         }
+
         json_object *sender_id = json_object_object_get(json, "sender");
         int id = json_object_get_int(sender_id);
         if (type == 0) {
-            /**
-             * JSON BE LIKE:
-             * {
-             *  "type": "text",
-             *  "data": "Hi slave))))"
-             * }
-             *
-             */
             json_object *message_json = json_object_object_get(json, "data");
             char *message = (char *) json_object_get_string(message_json);
 
@@ -60,14 +50,6 @@ void onDataPostAuth(dyad_Event *e) {  // Anything, when user is AUTH'ed
             //free(message); // CAUSES SEGFAULT
             //message = NULL;
         } else if (type == 1) {
-            /**
-             * JSON BE LIKE:
-             * {
-             *  "type": "sticker",
-             *  "data": "0_2"
-             * }
-             *
-             */
             json_object *sticker_json = json_object_object_get(json, "data");
             char *sticker = (char *) json_object_get_string(sticker_json);
 
