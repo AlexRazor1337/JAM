@@ -45,7 +45,7 @@ void onDataPostAuth(dyad_Event *e) {  // Anything, when user is AUTH'ed
                 type = strdup(json_object_get_string(value));
             }
         }
-        json_object *sender_id = json_object_object_get(json, "data");
+        json_object *sender_id = json_object_object_get(json, "sender");
         int id = json_object_get_int(sender_id);
         if (!strcmp(type, "text")) {
             /**

@@ -31,7 +31,6 @@ void uchat_recieve_text_message(guint id, gchar *message) {
 
     while (chats) {
         GList *inner_data = gtk_container_get_children(GTK_CONTAINER(chats->data));
-
         if (!strcmp(user_list_get_user_login_by_id(main_struct->user_list, id), gtk_label_get_text(GTK_LABEL(inner_data->data)))) {
             inner_data = inner_data->next;
 

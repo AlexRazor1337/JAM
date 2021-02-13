@@ -14,21 +14,16 @@ static void register_user(char *name, char *login, char *password) {
     strdel(&str);
 }
 
-  /**
-             * JSON BE LIKE:
-             * {
-             *  "type": "text",
-             *  "data": "Hi slave))))"
-             * }
-             *
-             */
 
 char *constructMsgJson(int sender_id, char *text, unsigned int timestamp, char *type) {
     (void)timestamp;
     // TODO Finish this
-    char *result = malloc(sizeof(int) * 2 + strlen(type) + strlen(text) + 128);
-    sprintf(result, "{\"sender\":\"%d\",\"type\":\"%s\", \"data\":\"%s\"}", sender_id, type, text);
-    printf("HER2\n");
+    char *result = NULL;
+    if (strncmp(type, "text", 4) == 0) {
+        char *result = malloc(sizeof(int) * 2 + strlen(type) + strlen(text) + 128);
+        sprintf(result, "{\"sender\":\"%d\",\"type\":\"%s\", \"data\":\"%s\"}", sender_id, type, text);
+    }
+
     return result;
 }
 
