@@ -14,14 +14,23 @@ static void register_user(char *name, char *login, char *password) {
     strdel(&str);
 }
 
+  /**
+             * JSON BE LIKE:
+             * {
+             *  "type": "text",
+             *  "data": "Hi slave))))"
+             * }
+             *
+             */
 
-// char *constructMsgJson(char *chat_id, char *sender_id, char *text, unsigned int timestamp) {
-//     (void)timestamp;
-//     // TODO Finish this
-//     char *result = malloc(strlen(chat_id) + strlen(sender_id) + strlen(text) + 128);
-//     //sprintf("{}")
-//     return result;
-// }
+char *constructMsgJson(int sender_id, char *text, unsigned int timestamp, char *type) {
+    (void)timestamp;
+    // TODO Finish this
+    char *result = malloc(sizeof(int) * 2 + strlen(type) + strlen(text) + 128);
+    sprintf(result, "{\"sender\":\"%d\",\"type\":\"%s\", \"data\":\"%s\"}", sender_id, type, text);
+    printf("HER2\n");
+    return result;
+}
 
 
 static void handleMsg(char *data) {
@@ -30,12 +39,14 @@ static void handleMsg(char *data) {
     char *text = malloc(strlen(data));
     sscanf(data, "/@%d/msg|%[^|]|%[^\r]", id, reciever_id, text);
     if (id && reciever_id && text) {
-        char *querry = malloc(strlen(data) + 256);  // TODO make it bigger depending on message size
+        char *querry = malloc(strlen(data) + 256);
         sprintf(querry, "INSERT INTO messages(id_sender, id_reciever, text, timestamp) VALUES('%d', '%s', '%s', '%ld');", *id, reciever_id, text, time(NULL));
         db_exec(db, querry, NULL);
         strdel(&querry);
         t_connection *reciever = find_node_uid(atoi(reciever_id), connections);
-        if (reciever) dyad_writef(reciever->stream, "/@%d/msg|%b", find_node_uid(*id, connections)->uid, text, strlen(text));
+        char *json = constructMsgJson(*id, text, time(NULL), "text");
+        if (reciever) dyad_writef(reciever->stream, "/@msg|%b", json, strlen(json));
+        strdel(&json);
     }
 
     free(id);
@@ -267,8 +278,3 @@ void signal_handler(int signal_number) {
     dyad_shutdown();
     exit(EXIT_SUCCESS);
 }
-
-//TODO List
-// 1. Add user
-// 2. Stickers
-// 3. Files

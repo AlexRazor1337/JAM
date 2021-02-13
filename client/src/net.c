@@ -20,8 +20,6 @@ void sendSFileMessage(size_t id, char *filename, char *binary_content) {
 
 void onDataPostAuth(dyad_Event *e) {  // Anything, when user is AUTH'ed
     printf("Post Auth: %s\n", e->data);
-    char *action = malloc(32);
-    sscanf(e->data, "/@%*d/%s|", action);
     if (strncmp("/@updmsg", e->data, 8) == 0) {
         // strdel(&client.json_data);
         client.json_data = malloc(strlen(e->data));
@@ -31,98 +29,96 @@ void onDataPostAuth(dyad_Event *e) {  // Anything, when user is AUTH'ed
         client.json_data = malloc(strlen(e->data));
         sscanf(e->data, "/@adduser|%[^\r]", client.json_data);
         uchat_seach_user_add_network();
-    } else if (strncmp("msg", action, 3) == 0) {
+    } else if (strncmp("/@msg", e->data, 5) == 0) {
         char *data = malloc(strlen(e->data));
-        int *id = malloc(sizeof(int));
-        sscanf(e->data, "/@%d/msg|%[^\r]", id, data);
+        sscanf(e->data, "/@msg|%[^\r]", data);
 
-        uchat_recieve_text_message(*id, data); // old version
+        //uchat_recieve_text_message(*id, data); // old version
 
-        // TODO: uncomment
-        // // json contents in data
-        // json_object *json = json_tokener_parse(data); 
-        // char *type = NULL;
+        //TODO: uncomment
+        // json contents in data
+        json_object *json = json_tokener_parse(data);
+        char *type = NULL;
 
-        // json_object_object_foreach(json, key, value) {
-        //     if (!strcmp(key, "type")) {
-        //         type = strdup(json_object_get_string(value));
-        //     }
-        // }
+        json_object_object_foreach(json, key, value) {
+            if (!strcmp(key, "type")) {
+                type = strdup(json_object_get_string(value));
+            }
+        }
+        json_object *sender_id = json_object_object_get(json, "data");
+        int id = json_object_get_int(sender_id);
+        if (!strcmp(type, "text")) {
+            /**
+             * JSON BE LIKE:
+             * {
+             *  "type": "text",
+             *  "data": "Hi slave))))"
+             * }
+             *
+             */
+            json_object *message_json = json_object_object_get(json, "data");
+            char *message = (char *) json_object_get_string(message_json);
 
-        // if (!strcmp(type, "text")) {
-        //     /**
-        //      * JSON BE LIKE:
-        //      * {
-        //      *  "type": "text",
-        //      *  "data": "Hi slave))))"
-        //      * }
-        //      * 
-        //      */
-        //     json_object *message_json = json_object_object_get(json, "data");
-        //     char *message = json_object_get_string(message_json);
+            uchat_recieve_text_message(id, message);
 
-        //     uchat_recieve_text_message(*id, message);
+            //free(message); // CAUSES SEGFAULT
+            //message = NULL;
+        } else if (!strcmp(type, "sticker")) {
+            /**
+             * JSON BE LIKE:
+             * {
+             *  "type": "sticker",
+             *  "data": "0_2"
+             * }
+             *
+             */
+            json_object *sticker_json = json_object_object_get(json, "data");
+            char *sticker = (char *) json_object_get_string(sticker_json);
 
-        //     free(message);
-        //     message = NULL;
-        // } else if (!strcmp(type, "sticker")) {
-        //     /**
-        //      * JSON BE LIKE:
-        //      * {
-        //      *  "type": "sticker",
-        //      *  "data": "0_2"
-        //      * }
-        //      * 
-        //      */
-        //     json_object *sticker_json = json_object_object_get(json, "data");
-        //     char *sticker = json_object_get_string(sticker_json);
+            uchat_recieve_sticker_message(id, sticker);
 
-        //     uchat_recieve_sticker_message(*id, sticker);
+            free(sticker);
+            sticker = NULL;
+        } else if (!strcmp(type, "file")) {
+            /**
+             * JSON BE LIKE:
+             * {
+             *  "type": "file",
+             *  "data": {
+             *      "filename": "cat_gif_text.gif",
+             *      "binary_content": "..."
+             *  }
+             * }
+             */
+            json_object *file_json = json_object_object_get(json, "data");
+            char *filename = NULL;
+            char *binary_content = NULL;
 
-        //     free(sticker);
-        //     sticker = NULL;
-        // } else if (!strcmp(type, "file")) {
-        //     /**
-        //      * JSON BE LIKE:
-        //      * {
-        //      *  "type": "file",
-        //      *  "data": {
-        //      *      "filename": "cat_gif_text.gif",
-        //      *      "binary_content": "..."
-        //      *  }
-        //      * }
-        //      */
-        //     json_object *file_json = json_object_object_get(json, "data");
-        //     char *filename = NULL;
-        //     char *binary_content = NULL;
+            json_object_object_foreach(file_json, key, value) {
+                if (!strcmp(key, "filename")) {
+                    filename = strdup(json_object_get_string(value));
+                } else if (!strcmp(key, "binary_content")){
+                    binary_content = strdup(json_object_get_string(value));
+                }
+            }
 
-        //     json_object_object_foreach(file_json, key, value) {
-        //         if (!strcmp(key, "filename")) {
-        //             filename = strdup(json_object_get_string(value));
-        //         } else if (!strcmp(key, "binary_content")){
-        //             binary_content = strdup(json_object_get_string(value));
-        //         }
-        //     }
+            char *path = strdup("resource/images/messages/");
+            path = strjoin(path, filename);
 
-        //     char *path = strdup("resource/images/messages/");
-        //     path = strjoin(path, filename);
+            FILE *file = fopen(path, "wb");
+            fputs(binary_content, file);
+            fclose(file);
 
-        //     FILE *file = fopen(path, "wb");
-        //     fputs(binary_content, file);
-        //     fclose(file);
+            uchat_recieve_file_message(id, filename, path);
 
-        //     uchat_recieve_file_message(*id, filename, path);
-
-        //     free(filename);
-        //     filename = NULL;
-        //     free(binary_content);
-        //     binary_content = NULL;
-        //     free(path);
-        //     path = NULL;
-        // }
+            free(filename);
+            filename = NULL;
+            free(binary_content);
+            binary_content = NULL;
+            free(path);
+            path = NULL;
+        }
     }
-    free(action);
-    action = NULL;
 }
 
 void addUser(char *login) {
