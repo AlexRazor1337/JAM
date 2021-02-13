@@ -43,7 +43,6 @@ void uchat_recieve_text_message(guint id, gchar *message) {
             }
 
             g_list_free(g_steal_pointer(&inner_data));
-
             break;
         }
 

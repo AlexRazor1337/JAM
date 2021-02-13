@@ -4,13 +4,8 @@ dyad_Stream *server_stream;
 t_connect_data *connect_data;
 
 // TODO: change msg -> textmsg (uncomment in another file)
-void sendTextMessage(size_t id, char *message) {
-    dyad_writef(server_stream, "/@%d/msg|%d|%b", client.uid, id, message, strlen(message));
-}
-
-// TODO: change msg -> stickermsg (uncomment in another file)
-void sendStickerMessage(size_t id, char *sticker) {
-    dyad_writef(server_stream, "/@%d/msg|%d|%b", client.uid, id, sticker, strlen(sticker));
+void sendMessage(size_t id, char *message, int type) {
+    dyad_writef(server_stream, "/@%d/msg|%d|%d|%b", client.uid, id, type, message, strlen(message));
 }
 
 // TODO: change msg -> filemsg (check right string formater) (uncomment in another file)
@@ -38,16 +33,17 @@ void onDataPostAuth(dyad_Event *e) {  // Anything, when user is AUTH'ed
         //TODO: uncomment
         // json contents in data
         json_object *json = json_tokener_parse(data);
-        char *type = NULL;
+        int type = 0;
 
         json_object_object_foreach(json, key, value) {
             if (!strcmp(key, "type")) {
-                type = strdup(json_object_get_string(value));
+                type = json_object_get_int(value);
+                break;
             }
         }
         json_object *sender_id = json_object_object_get(json, "sender");
         int id = json_object_get_int(sender_id);
-        if (!strcmp(type, "text")) {
+        if (type == 0) {
             /**
              * JSON BE LIKE:
              * {
@@ -63,7 +59,7 @@ void onDataPostAuth(dyad_Event *e) {  // Anything, when user is AUTH'ed
 
             //free(message); // CAUSES SEGFAULT
             //message = NULL;
-        } else if (!strcmp(type, "sticker")) {
+        } else if (type == 1) {
             /**
              * JSON BE LIKE:
              * {
@@ -77,9 +73,9 @@ void onDataPostAuth(dyad_Event *e) {  // Anything, when user is AUTH'ed
 
             uchat_recieve_sticker_message(id, sticker);
 
-            free(sticker);
-            sticker = NULL;
-        } else if (!strcmp(type, "file")) {
+            //free(sticker);  // CAUSES SEGFAULT
+            //sticker = NULL;
+        } else if (type == 2) {
             /**
              * JSON BE LIKE:
              * {

@@ -4,7 +4,7 @@ t_list *connections;
 
 static void db_prepare() {
     db_exec(db, "CREATE TABLE IF NOT EXISTS users (id integer PRIMARY KEY AUTOINCREMENT, name varchar, login varchar UNIQUE, password varchar, last_visit datetime);", NULL);
-    db_exec(db, "CREATE TABLE IF NOT EXISTS messages (id integer PRIMARY KEY AUTOINCREMENT, id_sender integer, id_reciever integer, text text, timestamp datetime, attachment integer);", NULL);
+    db_exec(db, "CREATE TABLE IF NOT EXISTS messages (id integer PRIMARY KEY AUTOINCREMENT, id_sender integer, id_reciever integer, text text, timestamp datetime, attachment integer, type integer);", NULL);
 }
 
 static void register_user(char *name, char *login, char *password) {
@@ -15,39 +15,45 @@ static void register_user(char *name, char *login, char *password) {
 }
 
 
-char *constructMsgJson(int sender_id, char *text, unsigned int timestamp, char *type) {
+char *constructMsgJson(int sender_id, char *text, unsigned int timestamp, int type) {
     (void)timestamp;
     // TODO Finish this
     char *result = NULL;
-    if (strncmp(type, "text", 4) == 0) {
-        char *result = malloc(sizeof(int) * 2 + strlen(type) + strlen(text) + 128);
-        sprintf(result, "{\"sender\":\"%d\",\"type\":\"%s\", \"data\":\"%s\"}", sender_id, type, text);
-    }
+    result = malloc(sizeof(int) * 3 + strlen(text) + 128);
+    sprintf(result, "{\"sender\":\"%d\",\"type\":\"%d\", \"data\":\"%s\"}", sender_id, type, text);
+    // if (type == 0) { // TEXT MSG
+    //     result = malloc(sizeof(int) * 2 + strlen(type) + strlen(text) + 128);
+    //     sprintf(result, "{\"sender\":\"%d\",\"type\":\"%s\", \"data\":\"%s\"}", sender_id, type, text);
+    // } else if (type ==)
 
     return result;
 }
 
 
-static void handleMsg(char *data) {
+static void handleMsg(char *msg) {
     int *id = malloc(sizeof(int));
     char *reciever_id = malloc(sizeof(int));
-    char *text = malloc(strlen(data));
-    sscanf(data, "/@%d/msg|%[^|]|%[^\r]", id, reciever_id, text);
-    if (id && reciever_id && text) {
-        char *querry = malloc(strlen(data) + 256);
-        sprintf(querry, "INSERT INTO messages(id_sender, id_reciever, text, timestamp) VALUES('%d', '%s', '%s', '%ld');", *id, reciever_id, text, time(NULL));
+    int *type = malloc(sizeof(int));
+    char *data = malloc(strlen(msg));
+
+    sscanf(msg, "/@%d/msg|%[^|]|%d|%[^\r]", id, reciever_id, type, data);
+    if (id && reciever_id && data) {
+
+        char *querry = malloc(strlen(msg) + 256);
+        sprintf(querry, "INSERT INTO messages(id_sender, id_reciever, text, timestamp, type) VALUES('%d', '%s', '%s', '%ld', '%d');", *id, reciever_id, data, time(NULL), *type);
         db_exec(db, querry, NULL);
         strdel(&querry);
+
         t_connection *reciever = find_node_uid(atoi(reciever_id), connections);
-        char *json = constructMsgJson(*id, text, time(NULL), "text");
+        char *json = constructMsgJson(*id, data, time(NULL), *type);
         if (reciever) dyad_writef(reciever->stream, "/@msg|%b", json, strlen(json));
         strdel(&json);
     }
-
     free(id);
     id = NULL;
+    // TODO free type
     strdel(&reciever_id);
-    strdel(&text);
+    strdel(&data);
 }
 
 
