@@ -17,11 +17,9 @@ void sendSFileMessage(size_t id, char *filename, char *binary_content) {
 void onDataPostAuth(dyad_Event *e) {  // Anything, when user is AUTH'ed
     printf("Post Auth: %s\n", e->data);
     if (strncmp("/@updmsg", e->data, 8) == 0) {
-        // strdel(&client.json_data);
         client.json_data = malloc(strlen(e->data));
         sscanf(e->data, "/@updmsg|%[^\r]", client.json_data);
     } else if (strncmp("/@adduser", e->data, 9) == 0) {
-        // strdel(&client.json_data);
         client.json_data = malloc(strlen(e->data));
         sscanf(e->data, "/@adduser|%[^\r]", client.json_data);
         uchat_seach_user_add_network();

@@ -1,5 +1,4 @@
 #include "list.h"
-// t_list *mx_sort_list(t_list *lst, bool (*cmp)(void*, void*));
 
 t_list *mx_create_node(void *data) {
     t_list *newNode = (t_list*)malloc(sizeof(newNode));
@@ -35,7 +34,6 @@ void mx_push_back(t_list **list, void *data) {
 
 
     temp -> next = mx_create_node(data);
-    printf("%s PUSH %s %s %s\n", "\x1B[31m", data, "\x1B[32m", temp -> next -> data);
 }
 
 void mx_push_front(t_list **list, void *data) {
