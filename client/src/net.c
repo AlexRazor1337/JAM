@@ -4,8 +4,18 @@ t_client client = {0};
 dyad_Stream *server_stream;
 t_connect_data *connect_data;
 
-// TODO: change msg -> textmsg (uncomment in another file)
+char* replace_char(char* str, char find, char replace){
+    char *current_pos = strchr(str,find);
+    while (current_pos) {
+        *current_pos = replace;
+        current_pos = strchr(current_pos,find);
+    }
+    return str;
+}
+
 void sendMessage(size_t id, char *message, int type) {
+    replace_char(message, '"', ' ');
+    replace_char(message, '\\', ' ');
     dyad_writef(server_stream, "/@%d/msg|%d|%d|%b", client.uid, id, type, message, strlen(message));
 }
 

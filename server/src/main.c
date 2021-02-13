@@ -212,8 +212,21 @@ static void getAuthDetails(dyad_Event *e) {
     sprintf(querry, "SELECT id, name FROM users WHERE login = '%s' AND password = '%s' LIMIT 1;", login, password); // TODO update visit
     sqlite3_get_table(db, querry, &result_table, &rows, &cols, NULL);
 
+    bool already_logged = false;
+    if (rows > 0) {
+        t_list *carret = connections;
+        while (carret) {
+            if (((t_connection *)carret->data)->uid == atoi(result_table[(0 + 1) * cols + 0])) {
+                already_logged = true;
+                break;
+            }
+            carret = carret->next;
+        }
+
+    }
+
     t_connection *client = find_node(*id, connections);
-    if (client && (!existing_user) && rows > 0) {
+    if (!already_logged && client && (!existing_user) && rows > 0) {
         client->uid = atoi(result_table[(0 + 1) * cols + 0]);
         printf("Client Authorized\n");
         dyad_removeListener(client->stream, DYAD_EVENT_DATA, getAuthDetails, NULL);
@@ -321,3 +334,7 @@ void signal_handler(int signal_number) {
     dyad_shutdown();
     exit(EXIT_SUCCESS);
 }
+
+//TODO 1. Daemonize
+//TODO 2. Add history loading
+//TODO 3. Add files handling
