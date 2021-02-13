@@ -36,19 +36,20 @@ static void loadMsgHistory(int id) {
         for (int i = 0; i < rows; i++){
             char *user_json = constructMsgJson(atoi(result_table[(i + 1) * cols]), result_table[(i + 1) * cols + 1], atol(result_table[(i + 1) * cols + 2]), atoi(result_table[(i + 1) * cols + 3]));
             vec_push(&v, user_json);
+            strdel(&user_json);
         }
 
-        // t_list *carret = messages;
-        // while (carret) {
-        //     free(carret->data);
-        //     carret = carret->next;
-        // }
-
-        char *json = jsonlist_from_jsones(v, (sizeof(int) * 4 + strlen(result_table[1 * cols + 1]) + 128) * v.length);
-        printf("MSG HIST %s\n", json);
-        t_connection *client = find_node_uid(id, connections);
-        if (client) dyad_writef(client->stream, "/@loadmsg|%b", json, strlen(json));
-        strdel(&json);
+        if (v.length > 1) {
+            char *json = jsonlist_from_jsones(v, (sizeof(int) * 4 + strlen(result_table[1 * cols + 1]) + 128) * v.length);
+            t_connection *client = find_node_uid(id, connections);
+            if (client) dyad_writef(client->stream, "/@loadmsg|%b", json, strlen(json));
+            strdel(&json);
+            vec_deinit(&v);
+        } else {
+            t_connection *client = find_node_uid(id, connections);
+            if (client) dyad_writef(client->stream, "/@loadmsg|[%b]", v.data[0], strlen(v.data[0]));
+        }
+        vec_deinit(&v);
     }
 
     sqlite3_free_table(result_table);
@@ -93,14 +94,20 @@ static void handleGetDialogsList(int id) {
         for (int i = 0; i < rows; i++) {
             char *user_json = malloc(38 + LOGIN_SIZE + USERNAME_SIZE + sizeof(int));
             sprintf(user_json, "{\"id\":\"%s\",\"name\":\"%s\",\"login\":\"%s\"}\n", result_table[(i + 1) * cols], result_table[(i + 1) * cols + 1], result_table[(i + 1) * cols + 2]);
-            vec_push(&v, strdup(user_json));
+            vec_push(&v, user_json);
             strdel(&user_json);
         }
 
-        char *json = jsonlist_from_jsones(v, (38 + LOGIN_SIZE + USERNAME_SIZE + sizeof(int)) * v.length);
-        t_connection *client = find_node_uid(id, connections);
-        if (client) dyad_writef(client->stream, "/@updmsg|%b", json, strlen(json));
-        strdel(&json);
+        if (v.length > 1) {
+            char *json = jsonlist_from_jsones(v, (38 + LOGIN_SIZE + USERNAME_SIZE + sizeof(int)) * v.length);
+            t_connection *client = find_node_uid(id, connections);
+            if (client) dyad_writef(client->stream, "/@updmsg|%b", json, strlen(json));
+            strdel(&json);
+        } else {
+            t_connection *client = find_node_uid(id, connections);
+            if (client) dyad_writef(client->stream, "/@updmsg|[%b]", v.data[0], strlen(v.data[0]));
+        }
+        vec_deinit(&v);
     } else {
         t_connection *client = find_node_uid(id, connections);
         if (client) dyad_writef(client->stream, "/@updmsg|[]");

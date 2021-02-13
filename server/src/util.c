@@ -66,11 +66,10 @@ char *jsonlist_from_jsones(vec_str_t v, int bsize) {
     char *cursor = temporal;
     char *cursor_2 = final_json;
     if (v.length == 1) {
-        sprintf(final_json, "[%s]", (char *)v.data[0]);
         free(temporal);
-        return final_json;
+        free(final_json);
+        return NULL;
     }
-
 
     sprintf(final_json, "[%s", (char *)v.data[0]);
     int i; char *val;
