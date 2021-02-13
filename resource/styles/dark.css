@@ -265,12 +265,14 @@ overshoot {
 
 
 
-#settings_box {
+#settings_box,
+#disconnect_box {
   background-color: #000;
   padding: 100px;
 }
 
-#settings_main_box {
+#settings_main_box,
+#disconnect_main_box {
   background-color: #040505;
   border-radius: 25px;
   padding: 15px;

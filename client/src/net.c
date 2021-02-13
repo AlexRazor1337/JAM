@@ -164,6 +164,9 @@ static void onInitialConnect(dyad_Event *e) { printf("%s\n", e->msg); }
 
 void onDisconnect() {
     client.state = UNAUTH;
+
+    uchat_disconnect_open(main_struct);
+    
     sleep(3);
     connectToServer();
 }
