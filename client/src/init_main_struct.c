@@ -6,6 +6,9 @@ t_main_struct *init_main_struct(int argc, char *argv[]) {
     main_struct->argc = argc;
     main_struct->argv = argv;
 
+    main_struct->ip = argv[1];
+    main_struct->port = atoi(argv[2]);
+
     main_struct->auth = init_auth();
 
     main_struct->uchat_window = NULL;

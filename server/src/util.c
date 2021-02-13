@@ -30,10 +30,8 @@ t_connection *find_node(int id, t_list *connections) {
 
 t_connection *find_node_uid(int uid, t_list *connections) {
     t_list *carret = connections;
-    //printf("GET UID: %d\n", uid);
     while (carret) {
         t_connection *data = carret->data;
-        //printf("UID: %d %d\n", uid, data->uid);
         if (data->uid == uid) return data;
         carret = carret->next;
     }
@@ -76,12 +74,10 @@ char *jsonlist_from_jsones(vec_str_t v, int bsize) {
     vec_foreach(&v, val, i) {
         if (i > 0) {
             if (i == v.length - 1) {
-                //printf("\x1B[0m%s | %s\n", cursor_2, (char *)v.data[i]);
                 sprintf(cursor, "%s,%s]", cursor_2, (char *)v.data[i]);
                 free(cursor_2);
                 cursor_2 = NULL;
             } else {
-                //printf("\x1B[0m%s,%s\n", cursor_2, (char *)v.data[i]);
                 sprintf(cursor, "%s,%s", cursor_2, (char *)v.data[i]);
                 free(cursor_2);
                 cursor_2 = malloc(bsize);

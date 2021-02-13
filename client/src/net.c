@@ -130,7 +130,7 @@ void onConnectedData(dyad_Event *e) {  // Gets temporal user id
 
     dyad_removeListener(server_stream, DYAD_EVENT_DATA, onConnectedData, NULL);
     dyad_addListener(server_stream, DYAD_EVENT_DATA, onDataWaitAuthAnswer, NULL);
-    //TODO
+
     if (connect_data->to_sign_up) {
         dyad_writef(server_stream, "/@%d/signup|%s|%s|%s", id, client.login, client.password, client.username);
     } else {
@@ -150,7 +150,7 @@ void connectToServer() {
     server_stream = dyad_newStream();
     dyad_addListener(server_stream, DYAD_EVENT_CONNECT, onInitialConnect, NULL);
     dyad_addListener(server_stream, DYAD_EVENT_DATA, onConnectedData, NULL);
-    dyad_connect(server_stream, SERVER_ADRESS, SERVER_PORT);  //TODO Check connection
+    dyad_connect(server_stream, main_struct->ip, main_struct->port);
 }
 
 void *serverInit(void *argument) {

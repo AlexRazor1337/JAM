@@ -76,7 +76,8 @@ static void handleMsg(char *msg) {
     }
     free(id);
     id = NULL;
-    // TODO free type
+    free(type);
+    type = NULL;
     strdel(&reciever_id);
     strdel(&data);
 }
@@ -206,7 +207,6 @@ static void getAuthDetails(dyad_Event *e) {
         strdel(&check_querry);
     } else sscanf(e->data, "/@%d/authorize|%[^|]|%s", id, login, password);
 
-    // sscanf("{\"temporal\":\"1\",\"login\":\"hello\",\"password\":\"pass\"}", "{\"temporal\":\"%d\",\"login\":\"%[^\"]\",\"password\":\"%[^\"]\'}", id, login, password);
     char **result_table = NULL;
     int rows = 0, cols  = 0;
     sprintf(querry, "SELECT id, name FROM users WHERE login = '%s' AND password = '%s' LIMIT 1;", login, password); // TODO update visit
@@ -259,7 +259,12 @@ static void check_disconnected_client() {
 }
 
 
-int main() {
+int main(int argc, char *argv[]) {
+    if (argc < 2) {
+        write(STDERR_FILENO, "usage: ./uchat_server port\n", 28);
+        exit(EXIT_FAILURE);
+    }
+
 #if defined(__linux__)
     setvbuf(stdout, NULL, _IONBF, 0);
 #endif
@@ -290,7 +295,7 @@ int main() {
 
     dyad_Stream *serv = dyad_newStream();
     dyad_addListener(serv, DYAD_EVENT_ACCEPT, firstConnectionEvent, NULL);
-    dyad_listen(serv, 8000);
+    dyad_listen(serv, atoi(argv[1]));
 
     signal(SIGINT, signal_handler);
 #pragma endregion sockets_init

@@ -6,6 +6,7 @@
 #include <string.h>
 #include <time.h>
 #include "net.h"
+#include <unistd.h>
 
 typedef struct s_auth {
     guint id;
@@ -37,6 +38,9 @@ typedef struct s_settings {
 } t_settings;
 
 typedef struct s_main_struct {
+    char *ip;
+    int port;
+
     gint argc;
     gchar **argv;
     gchar *theme;
