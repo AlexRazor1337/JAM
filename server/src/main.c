@@ -48,9 +48,9 @@ static void loadMsgHistory(int id) {
         for (int i = 0; i < rows; i++){
             char *user_json = constructMsgJson(atoi(result_table[(i + 1) * cols]), result_table[(i + 1) * cols + 1], atol(result_table[(i + 1) * cols + 2]), atoi(result_table[(i + 1) * cols + 3]));
             vec_push(&v, user_json);
-            strdel(&user_json);
+            //strdel(&user_json);
         }
-
+    //TODO CLEAR VEC
         if (v.length > 1) {
             char *json = jsonlist_from_jsones(v, (sizeof(int) * 4 + strlen(result_table[1 * cols + 1]) + 128) * v.length);
             t_connection *client = find_node_uid(id, connections);
@@ -331,8 +331,8 @@ int main(int argc, char *argv[]) {
 
 #pragma endregion sockets_init
 //TODO Delete
-    register_user("MemoMmm", "memo", "qwerty");
-    register_user("Ayyyyy", "lmao", "qwerty");
+    // register_user("MemoMmm", "memo", "qwerty");
+    // register_user("Ayyyyy", "lmao", "qwerty");
     while (dyad_getStreamCount() > 0) {
         dyad_update();
         check_disconnected_client();

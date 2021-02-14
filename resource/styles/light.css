@@ -322,7 +322,7 @@ overshoot {
 
 #profile_username_entry_error,
 #profile_password_entry_error {
-  color: #fff;
+  color: #679EB6;
   font-size: 18px;
   border-bottom: 1px solid rgb(255, 94, 94);
 }
