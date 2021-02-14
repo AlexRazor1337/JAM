@@ -14,7 +14,6 @@ char* replace_char(char* str, char find, char replace){
 }
 
 void sendMessage(size_t id, char *message, int type) {
-    printf("WTF?: %s %d\n", message, type);
     replace_char(message, '"', ' ');
     replace_char(message, '\\', ' ');
     dyad_writef(server_stream, "/@%d/msg|%d|%d|%b", client.uid, id, type, message, strlen(message));
