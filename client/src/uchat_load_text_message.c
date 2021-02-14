@@ -53,6 +53,8 @@ void uchat_load_text_message(gint id, gchar *message) {
 
     g_list_free(g_steal_pointer(&chats));
 
-    pthread_t thread;
-    pthread_create(&thread, NULL, uchat_mainbar_chat_scroll_thread, NULL);
+    if (!strcmp(main_struct->current->login, user_list_get_user_login_by_id(main_struct->user_list, id))) {
+        pthread_t thread;
+        pthread_create(&thread, NULL, uchat_mainbar_chat_scroll_thread, NULL);
+    }
 }

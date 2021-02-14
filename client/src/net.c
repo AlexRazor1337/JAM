@@ -47,12 +47,12 @@ void onDataPostAuth(dyad_Event *e) {  // Anything, when user is AUTH'ed
             json_object *message_json = json_object_object_get(json, "data");
             char *message = (char *) json_object_get_string(message_json);
 
-            uchat_recieve_text_message(id, message);
+            uchat_recieve_text_message(id, message, TRUE);
         } else if (type == 1) {
             json_object *sticker_json = json_object_object_get(json, "data");
             char *sticker = (char *) json_object_get_string(sticker_json);
 
-            uchat_recieve_sticker_message(id, sticker);
+            uchat_recieve_sticker_message(id, sticker, TRUE);
         } else if (type == 2) {
             /**
              * JSON BE LIKE:
@@ -113,13 +113,13 @@ void onDataPostAuth(dyad_Event *e) {  // Anything, when user is AUTH'ed
                 if (sender == (int) main_struct->auth->id) {
                     uchat_load_text_message(reciever, data);
                 } else {
-                    uchat_recieve_text_message(sender, data);
+                    uchat_recieve_text_message(sender, data, FALSE);
                 }
             } else if (type == 1) {
                 if (sender == (int) main_struct->auth->id) {
                     uchat_load_sticker_message(reciever, data);
                 } else {
-                    uchat_recieve_sticker_message(sender, data);
+                    uchat_recieve_sticker_message(sender, data, FALSE);
                 }
             } else if (type == 2) {
 
