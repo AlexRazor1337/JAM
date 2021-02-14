@@ -13,13 +13,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/resource.h>  //TODO REmove
 #include <sys/socket.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <time.h>
 #include <unistd.h>
-#include <syslog.h>
+// #include <syslog.h>
 
 #include "../../libs/dyad/dyad.h"
 #include "../../libs/list/list.h"

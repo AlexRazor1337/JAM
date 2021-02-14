@@ -5,7 +5,7 @@ int db_exec(sqlite3 *db, char* querry, char** result) {
     int rc = sqlite3_prepare_v2(db, querry, -1, &res, 0);
 
     if (rc != SQLITE_OK) {
-        syslog(0, "Failed to fetch data: %s\n", sqlite3_errmsg(db));
+        // syslog(0, "Failed to fetch data: %s\n", sqlite3_errmsg(db));
         return rc;
     }
 

@@ -115,12 +115,11 @@ void daemonize() {
 
     signal(SIGCHLD, SIG_IGN);
     signal(SIGHUP, SIG_IGN);
-
     pid = fork();
+    
     if (pid < 0) exit(EXIT_FAILURE);
-    printf("%d\n", pid);
     if (pid > 0) exit(EXIT_SUCCESS);
     umask(0);
 
-    openlog ("uchat_server", LOG_PID, LOG_DAEMON);
+    // openlog ("uchat_server", LOG_PID, LOG_DAEMON);
 }

@@ -344,6 +344,7 @@ static void check_disconnected_client() {
 
 int main(int argc, char *argv[]) {
     daemonize();
+    printf("Sever PID: %d\n", getpid());
     if (argc < 2) {
         write(STDERR_FILENO, "usage: ./uchat_server port\n", 28);
         exit(EXIT_FAILURE);
@@ -353,8 +354,8 @@ int main(int argc, char *argv[]) {
     setvbuf(stdout, NULL, _IONBF, 0);
 #endif
     char *result;
-    syslog(0, "INITIALIZING JAM SERVER 🤡\n");
-    syslog(0, "INITIALIZING SQLITE: ");
+    // syslog(0, "INITIALIZING JAM SERVER 🤡\n");
+    // syslog(0, "INITIALIZING SQLITE: ");
 #pragma region db_init
     if (!is_dir_exists("server_data"))
         mkdir("server_data", 0755);
@@ -362,7 +363,7 @@ int main(int argc, char *argv[]) {
     int rc = sqlite3_open("server_data/main.db", &db);
 
     if (rc != SQLITE_OK) {
-        syslog(0, "Cannot open database: %s\n", sqlite3_errmsg(db));
+        // syslog(0, "Cannot open database: %s\n", sqlite3_errmsg(db));
         sqlite3_close(db);
         exit(EXIT_FAILURE);
     }
@@ -370,11 +371,11 @@ int main(int argc, char *argv[]) {
 #pragma endregion db_init
 
     db_exec(db, "SELECT SQLITE_VERSION()", &result);
-    syslog(0, "VER. %s\n", result);
+    // syslog(0, "VER. %s\n", result);
 
 #pragma region sockets_init
     dyad_init();
-    syslog(0, "INITIALIZING DYAD: VER. %s\n", dyad_getVersion());
+    // syslog(0, "INITIALIZING DYAD: VER. %s\n", dyad_getVersion());
 
     dyad_Stream *serv = dyad_newStream();
     dyad_addListener(serv, DYAD_EVENT_ACCEPT, firstConnectionEvent, NULL);
@@ -400,7 +401,7 @@ int main(int argc, char *argv[]) {
 void signal_handler(int signal_number) {
     (void) signal_number;
     /* TODO: Put exit cleanup code here. */
-    syslog(0, "Bye-bye!\n");
+    // syslog(0, "Bye-bye!\n");
     dyad_shutdown();
     exit(EXIT_SUCCESS);
 }
