@@ -5,6 +5,18 @@ t_list *connections;
 static void db_prepare() {
     db_exec(db, "CREATE TABLE IF NOT EXISTS users (id integer PRIMARY KEY AUTOINCREMENT, name varchar, login varchar UNIQUE, password varchar, last_visit datetime);", NULL);
     db_exec(db, "CREATE TABLE IF NOT EXISTS messages (id integer PRIMARY KEY AUTOINCREMENT, id_sender integer, id_reciever integer, text text, timestamp datetime, attachment integer, type integer);", NULL);
+    db_exec(db, "CREATE TABLE IF NOT EXISTS files (id integer PRIMARY KEY AUTOINCREMENT, id_sender integer, binary text);", NULL);
+}
+
+static void uploadFile(int sender, char *binary) {
+    char *str = malloc(128 + strlen(binary));
+    sprintf(str, "INSERT INTO files(id_sender, binary) VALUES('%d', '%s');", sender, binary);
+    db_exec(db, str, NULL);
+    strdel(&str);
+}
+
+static void sendFile(int file_id, int receiver_id) {
+
 }
 
 static void register_user(char *name, char *login, char *password) {
@@ -14,46 +26,46 @@ static void register_user(char *name, char *login, char *password) {
     strdel(&str);
 }
 
-char *constructMsgJson(int sender_id, char *text, unsigned int timestamp, int type) {
+char *constructMsgJson(int sender_id, char *text, unsigned int timestamp, int type, int reciever) {
     (void) timestamp;
     // TODO Finish this
     char *result = NULL;
     result = malloc(sizeof(int) * 3 + strlen(text) + 128);
-    sprintf(result, "{\"sender\":\"%d\",\"type\":\"%d\",\"data\":\"%s\"}", sender_id, type, text);
+    sprintf(result, "{\"id_reciever\":%d,\"sender\":\"%d\",\"type\":\"%d\",\"data\":\"%s\"}", reciever, sender_id, type, text);
 
     return result;
 }
 
-// static void loadMsgHistory(int id) {
-//     char **result_table = NULL;
-//     int rows, cols;
-//     char *querry = malloc(96 + sizeof(int));
-//     sprintf(querry, "SELECT id_sender, text, timestamp, type FROM messages WHERE id_reciever = '%d' or id_sender = '%d';", id, id);
-//     sqlite3_get_table(db, querry, &result_table, &rows, &cols, NULL);
-//     if (rows > 0) {
-//         vec_str_t v;
-//         vec_init(&v);
-//         for (int i = 0; i < rows; i++){
-//             char *user_json = constructMsgJson(atoi(result_table[(i + 1) * cols]), result_table[(i + 1) * cols + 1], atol(result_table[(i + 1) * cols + 2]), atoi(result_table[(i + 1) * cols + 3]));
-//             vec_push(&v, user_json);
-//             //strdel(&user_json);
-//         }
-//     //TODO CLEAR VEC
-//         if (v.length > 1) {
-//             char *json = jsonlist_from_jsones(v, (sizeof(int) * 4 + strlen(result_table[1 * cols + 1]) + 128) * v.length);
-//             t_connection *client = find_node_uid(id, connections);
-//             if (client) dyad_writef(client->stream, "/@loadmsg|%b", json, strlen(json));
-//             strdel(&json);
-//             vec_deinit(&v);
-//         } else {
-//             t_connection *client = find_node_uid(id, connections);
-//             if (client) dyad_writef(client->stream, "/@loadmsg|[%b]", v.data[0], strlen(v.data[0]));
-//         }
-//         vec_deinit(&v);
-//     }
+static void loadMsgHistory(int id) {
+    char **result_table = NULL;
+    int rows, cols;
+    char *querry = malloc(96 + sizeof(int));
+    sprintf(querry, "SELECT id_sender, text, timestamp, type, id_reciever FROM messages WHERE id_reciever = '%d' or id_sender = '%d';", id, id);
+    sqlite3_get_table(db, querry, &result_table, &rows, &cols, NULL);
+    if (rows > 0) {
+        vec_str_t v;
+        vec_init(&v);
+        for (int i = 0; i < rows; i++){
+            char *user_json = constructMsgJson(atoi(result_table[(i + 1) * cols]), result_table[(i + 1) * cols + 1], atol(result_table[(i + 1) * cols + 2]), atoi(result_table[(i + 1) * cols + 3]), atoi(result_table[(i + 1) * cols + 4]));
+            vec_push(&v, user_json);
+            //strdel(&user_json);
+        }
+    //TODO CLEAR VEC
+        if (v.length > 1) {
+            char *json = jsonlist_from_jsones(v, (sizeof(int) * 4 + strlen(result_table[1 * cols + 1]) + 128) * v.length);
+            t_connection *client = find_node_uid(id, connections);
+            if (client) dyad_writef(client->stream, "/@loadmsg|%b", json, strlen(json));
+            strdel(&json);
+            vec_deinit(&v);
+        } else {
+            t_connection *client = find_node_uid(id, connections);
+            if (client) dyad_writef(client->stream, "/@loadmsg|[%b]", v.data[0], strlen(v.data[0]));
+        }
+        vec_deinit(&v);
+    }
 
-//     sqlite3_free_table(result_table);
-// }
+    sqlite3_free_table(result_table);
+}
 
 static void handleMsg(char *msg) {
     int *id = malloc(sizeof(int));
@@ -70,7 +82,7 @@ static void handleMsg(char *msg) {
         strdel(&querry);
 
         t_connection *reciever = find_node_uid(atoi(reciever_id), connections);
-        char *json = constructMsgJson(*id, data, time(NULL), *type);
+        char *json = constructMsgJson(*id, data, time(NULL), *type, atoi(reciever_id));
         if (reciever) dyad_writef(reciever->stream, "/@msg|%b", json, strlen(json));
         strdel(&json);
     }
@@ -81,7 +93,6 @@ static void handleMsg(char *msg) {
     strdel(&reciever_id);
     strdel(&data);
 }
-
 
 static void handleGetDialogsList(int id) {
     char **result_table = NULL;
@@ -117,7 +128,7 @@ static void handleGetDialogsList(int id) {
     sqlite3_free_table(result_table);
     strdel(&querry);
     dyad_update();
-    //loadMsgHistory(id);
+    loadMsgHistory(id);
 }
 
 
@@ -175,11 +186,13 @@ static void postAuthData(dyad_Event *e) {
     printf("PAD: %s\n", e->data);
     char *action = malloc(16);
     int *id = malloc(sizeof(int));
-    sscanf(e->data, "/@%d/%[^|]|", id, action);
+    char *data = malloc(strlen(e->data));
+    sscanf(e->data, "/@%d/%[^|]|%s", id, action, data);
 
     if (strcmp(action, "msg") == 0) handleMsg(e->data);
     else if (strcmp(action, "getchats") == 0) handleGetDialogsList(*id);
     else if (strcmp(action, "adduser") == 0) handleAddUser(e->data);
+    else if (strcmp(action, "upldfile") == 0) uploadFile(id, data);
     strdel(&action);
     free(id);
     id = NULL;
