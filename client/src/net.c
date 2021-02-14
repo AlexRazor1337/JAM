@@ -234,7 +234,7 @@ void *serverInit(void *argument) {
     connectToServer();
     client.state = UNAUTH;
     
-    while (true) {  // main loop
+    while (dyad_getStreamCount() > 0) {  // main loop
         if (client.state == AUTH) {
             if (dyad_getState(server_stream) == DYAD_STATE_CLOSED) onDisconnect();
         }

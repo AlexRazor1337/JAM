@@ -386,8 +386,6 @@ int main(int argc, char *argv[]) {
 
 #pragma endregion sockets_init
 //TODO Delete
-    register_user("MemoMmm", "memo", "qwerty");
-    register_user("Ayyyyy", "lmao", "qwerty");
     while (dyad_getStreamCount() > 0) {
         dyad_update();
         check_disconnected_client();
