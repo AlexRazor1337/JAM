@@ -26,12 +26,12 @@ static void register_user(char *name, char *login, char *password) {
     strdel(&str);
 }
 
-char *constructMsgJson(int sender_id, char *text, unsigned int timestamp, int type) {
+char *constructMsgJson(int sender_id, char *text, unsigned int timestamp, int type, int reciever) {
     (void) timestamp;
     // TODO Finish this
     char *result = NULL;
     result = malloc(sizeof(int) * 3 + strlen(text) + 128);
-    sprintf(result, "{\"sender\":\"%d\",\"type\":\"%d\",\"data\":\"%s\"}", sender_id, type, text);
+    sprintf(result, "{\"id_reciever\":%d,\"sender\":\"%d\",\"type\":\"%d\",\"data\":\"%s\"}", reciever, sender_id, type, text);
 
     return result;
 }
@@ -40,13 +40,13 @@ static void loadMsgHistory(int id) {
     char **result_table = NULL;
     int rows, cols;
     char *querry = malloc(96 + sizeof(int));
-    sprintf(querry, "SELECT id_sender, text, timestamp, type FROM messages WHERE id_reciever = '%d' or id_sender = '%d';", id, id);
+    sprintf(querry, "SELECT id_sender, text, timestamp, type, id_reciever FROM messages WHERE id_reciever = '%d' or id_sender = '%d';", id, id);
     sqlite3_get_table(db, querry, &result_table, &rows, &cols, NULL);
     if (rows > 0) {
         vec_str_t v;
         vec_init(&v);
         for (int i = 0; i < rows; i++){
-            char *user_json = constructMsgJson(atoi(result_table[(i + 1) * cols]), result_table[(i + 1) * cols + 1], atol(result_table[(i + 1) * cols + 2]), atoi(result_table[(i + 1) * cols + 3]));
+            char *user_json = constructMsgJson(atoi(result_table[(i + 1) * cols]), result_table[(i + 1) * cols + 1], atol(result_table[(i + 1) * cols + 2]), atoi(result_table[(i + 1) * cols + 3]), atoi(result_table[(i + 1) * cols + 4]));
             vec_push(&v, user_json);
             //strdel(&user_json);
         }
@@ -82,7 +82,7 @@ static void handleMsg(char *msg) {
         strdel(&querry);
 
         t_connection *reciever = find_node_uid(atoi(reciever_id), connections);
-        char *json = constructMsgJson(*id, data, time(NULL), *type);
+        char *json = constructMsgJson(*id, data, time(NULL), *type, atoi(reciever_id));
         if (reciever) dyad_writef(reciever->stream, "/@msg|%b", json, strlen(json));
         strdel(&json);
     }
