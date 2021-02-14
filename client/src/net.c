@@ -160,7 +160,9 @@ void onConnectedData(dyad_Event *e) {  // Gets temporal user id
     }
 }
 
-static void onInitialConnect(dyad_Event *e) { printf("%s\n", e->msg); }
+static void onInitialConnect(dyad_Event *e) {
+    printf("%s\n", e->msg);
+}
 
 void onDisconnect() {
     client.state = UNAUTH;
@@ -169,6 +171,8 @@ void onDisconnect() {
     
     sleep(3);
     connectToServer();
+
+    // uchat_disconnect_close(main_struct);
 }
 
 void connectToServer() {

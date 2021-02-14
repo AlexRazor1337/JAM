@@ -176,6 +176,7 @@ void uchat_mainbar_chat_scroll(t_main_struct *main_struct);
 void *uchat_mainbar_chat_scroll_thread();
 void uchat_stickerbar_sticker_new(t_main_struct *main_struct, gint column, gint row);
 void uchat_disconnect_open(t_main_struct *main_struct);
+void uchat_disconnect_close(t_main_struct *main_struct);
 void uchat_settings_open(GtkWidget *button, t_main_struct *main_struct);
 void uchat_settings_close(GtkWidget *button, t_main_struct *main_struct);
 void uchat_settings_close_with_save(GtkWidget *button, t_main_struct *main_struct);

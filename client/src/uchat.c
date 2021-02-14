@@ -365,21 +365,22 @@ void uchat(GtkWidget *button, t_main_struct *main_struct) {
     gtk_widget_set_name(search_box_add_image, "search_box_add_image");
     gtk_widget_set_halign(search_box_add_image, GTK_ALIGN_CENTER);
 
+
+
     // Disconnect box
-    disconnect_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    disconnect_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 70);
     gtk_widget_set_name(disconnect_box, "disconnect_box");
     gtk_widget_set_size_request(disconnect_box, 1400, 900);
+    gtk_widget_set_valign(disconnect_box, GTK_ALIGN_CENTER);
+
+
+
+    // Settings
 
     GtkWidget *settings_main_box;
-    GtkWidget *disconnect_main_box;
     GtkWidget *settings_main_profile_box;
     GtkWidget *settings_main_theme_box;
     GtkWidget *settings_main_control_box;
-
-    disconnect_main_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-    gtk_widget_set_name(disconnect_main_box, "disconnect_main_box");
-    gtk_widget_set_halign(disconnect_main_box, GTK_ALIGN_CENTER);
-    gtk_widget_set_size_request(disconnect_main_box, 760, 700);
 
     // main settings fixed
     settings_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
@@ -492,6 +493,7 @@ void uchat(GtkWidget *button, t_main_struct *main_struct) {
     gtk_widget_set_name(profile_image_image, "profile_image_image");
 
     profile_image_set_image = gtk_image_new();
+
     if (!strcmp(main_struct->theme, "default")) {
         gtk_image_set_from_file(GTK_IMAGE(profile_image_set_image), "resource/images/default/plus.png");
     } else if (!strcmp(main_struct->theme, "light")) {
@@ -499,6 +501,7 @@ void uchat(GtkWidget *button, t_main_struct *main_struct) {
     } else if (!strcmp(main_struct->theme, "dark")) {
         gtk_image_set_from_file(GTK_IMAGE(profile_image_set_image), "resource/images/dark/plus.png");
     }
+    
     gtk_widget_set_name(profile_image_set_image, "profile_image_set_image");
     gtk_widget_set_size_request(profile_image_set_image, 40, 40);
     gtk_widget_set_halign(profile_image_set_image, GTK_ALIGN_CENTER);
@@ -514,17 +517,18 @@ void uchat(GtkWidget *button, t_main_struct *main_struct) {
     gtk_widget_set_name(disconnect_reconnecting_label, "disconnect_reconnecting_label");
     
     disconnect_logo_image = gtk_image_new();
-    if (!strcmp(main_struct->theme, "default")) {
-        gtk_image_set_from_file(GTK_IMAGE(profile_image_set_image), "resource/images/ja.png");
-    }
+    // if (!strcmp(main_struct->theme, "default")) {
+        gtk_image_set_from_file(GTK_IMAGE(disconnect_logo_image), "resource/images/jam.png");
+    // }
     // else if (!strcmp(main_struct->theme, "light")) {
     //     gtk_image_set_from_file(GTK_IMAGE(profile_image_set_image), "resource/images/light/plus.png");
-    // } else if (!strcmp(main_struct->theme, "dark")) {
+    // }
+    // else if (!strcmp(main_struct->theme, "dark")) {
     //     gtk_image_set_from_file(GTK_IMAGE(profile_image_set_image), "resource/images/dark/plus.png");
     // }
     gtk_widget_set_name(disconnect_logo_image, "disconnect_logo_image");
     // gtk_widget_set_size_request(disconnect_logo_image, 40, 40);
-    gtk_widget_set_halign(disconnect_logo_image, GTK_ALIGN_CENTER);
+    // gtk_widget_set_halign(disconnect_logo_image, GTK_ALIGN_CENTER);
 
     // Themes
 
@@ -699,10 +703,8 @@ void uchat(GtkWidget *button, t_main_struct *main_struct) {
 
 
     // Disconnect
-    gtk_box_pack_start(GTK_BOX(disconnect_main_box), disconnect_reconnecting_label, FALSE, FALSE, 0);
-
     gtk_box_pack_start(GTK_BOX(disconnect_box), disconnect_logo_image, FALSE, FALSE, 0);
-    gtk_box_pack_start(GTK_BOX(disconnect_box), disconnect_main_box, FALSE, FALSE, 0);
+    gtk_box_pack_start(GTK_BOX(disconnect_box), disconnect_reconnecting_label, FALSE, FALSE, 0);
 
     gtk_fixed_put(GTK_FIXED(main_fixed), settings_box, 0, 0);
     gtk_fixed_put(GTK_FIXED(main_fixed), disconnect_box, 0, 0);
@@ -710,6 +712,8 @@ void uchat(GtkWidget *button, t_main_struct *main_struct) {
     gtk_fixed_put(GTK_FIXED(main_fixed), search_box, 10, 815);
 
     gtk_container_add(GTK_CONTAINER(uchat_window), main_fixed);
+
+
 
     // signals
     g_signal_connect(panel_settings_button, "clicked", G_CALLBACK(uchat_settings_open), main_struct);
@@ -804,9 +808,6 @@ void uchat(GtkWidget *button, t_main_struct *main_struct) {
 
     // disconnect
     main_struct->disconnect = (t_disconnect *)malloc(sizeof(t_disconnect));
-
-    // main_struct->disconnect->image_widget = disconnect_image_image;
-    // main_struct->disconnect->image = strdup(main_struct->disconnect->image);
 
     // plug
     if (!button) return;
