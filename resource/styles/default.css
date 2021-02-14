@@ -383,3 +383,15 @@ overshoot {
 #control_save_button:hover {
   background-color: #08B719;
 }
+
+
+
+#disconnect_box {
+  background-color: #070F21;
+  padding-top: 280px;
+}
+
+#disconnect_reconnecting_label {
+  font-size: 50px;
+  color: white;
+}

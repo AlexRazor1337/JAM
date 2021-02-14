@@ -37,6 +37,11 @@ typedef struct s_settings {
     gchar *image;
 } t_settings;
 
+typedef struct s_disconnect {
+    gchar *disconnect_reconnecting_label;
+    GtkWidget *disconnect_logo_image;
+} t_disconnect;
+
 typedef struct s_main_struct {
     char *ip;
     int port;
@@ -48,6 +53,7 @@ typedef struct s_main_struct {
     t_auth *auth;
     t_user_list *user_list;
     t_settings *settings;
+    t_disconnect *disconnect;
 
     t_user *current;
 
@@ -74,6 +80,8 @@ typedef struct s_main_struct {
 
     GtkWidget *settings_box;
     GtkWidget *uchat_box;
+
+    GtkWidget *disconnect_box;
 
     GtkWidget *sidebar_box;
     GtkWidget *mainbar_box;
@@ -171,6 +179,8 @@ void uchat_mainbar_chat_new(t_main_struct *main_struct, t_user *current);
 void uchat_mainbar_chat_scroll(t_main_struct *main_struct);
 void *uchat_mainbar_chat_scroll_thread();
 void uchat_stickerbar_sticker_new(t_main_struct *main_struct, gint column, gint row);
+void uchat_disconnect_open(t_main_struct *main_struct);
+void uchat_disconnect_close(t_main_struct *main_struct);
 void uchat_settings_open(GtkWidget *button, t_main_struct *main_struct);
 void uchat_settings_close(GtkWidget *button, t_main_struct *main_struct);
 void uchat_settings_close_with_save(GtkWidget *button, t_main_struct *main_struct);

@@ -3,6 +3,7 @@
 t_client client = {0};
 dyad_Stream *server_stream;
 t_connect_data *connect_data;
+bool reconnect = false;
 
 char* replace_char(char* str, char find, char replace){
     char *current_pos = strchr(str,find);
@@ -167,12 +168,22 @@ void onConnectedData(dyad_Event *e) {  // Gets temporal user id
     }
 }
 
-static void onInitialConnect(dyad_Event *e) { printf("%s\n", e->msg); }
+static void onInitialConnect(dyad_Event *e) {
+    printf("%s\n", e->msg);
+
+    if (reconnect) {
+        uchat_disconnect_close(main_struct);
+        reconnect = false;
+    }
+}
 
 void onDisconnect() {
     client.state = UNAUTH;
+    uchat_disconnect_open(main_struct);
     sleep(3);
     connectToServer();
+
+    reconnect = true;
 }
 
 void connectToServer() {
