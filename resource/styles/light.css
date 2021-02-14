@@ -387,3 +387,15 @@ overshoot {
   color: #fff;
   background-color: #08B719;
 }
+
+
+
+#disconnect_box {
+  background-color: #fff;
+  padding-top: 280px;
+}
+
+#disconnect_reconnecting_label {
+  font-size: 50px;
+  color: #679EB6;
+}
