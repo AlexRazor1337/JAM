@@ -1,6 +1,6 @@
 #include "client.h"
 
-void uchat_recieve_sticker_message(guint id, gchar *sticker) {
+void uchat_recieve_sticker_message(guint id, gchar *sticker, gboolean sound) {
     GtkWidget *recieved_message_box;
     GtkWidget *recieved_message_image;
     GtkWidget *recieved_time_stamp_label;
@@ -39,8 +39,6 @@ void uchat_recieve_sticker_message(guint id, gchar *sticker) {
 
             gtk_box_pack_start(GTK_BOX(inner_data->data), recieved_message_box, FALSE, FALSE, 0);
 
-            system("afplay resource/audio/receive-sticker.mp3");
-
             if (!strcmp(main_struct->current->login, user_list_get_user_login_by_id(main_struct->user_list, id))) {
                 gtk_widget_show_all(chats->data);
             }
@@ -57,7 +55,9 @@ void uchat_recieve_sticker_message(guint id, gchar *sticker) {
 
     g_list_free(g_steal_pointer(&chats));
 
-    g_print("Recieved from %s(%d) to %s(%d) sticker message: %s\n", main_struct->current->username, main_struct->current->id, main_struct->auth->username, main_struct->auth->id, sticker);
+    if (sound) {
+        system("afplay resource/audio/receive-sticker.mp3");
+    }
 
     if (!strcmp(main_struct->current->login, user_list_get_user_login_by_id(main_struct->user_list, id))) {
         pthread_t thread;

@@ -56,8 +56,6 @@ void uchat_send_text_message(GtkWidget *button, t_main_struct *main_struct) {
 
         system("afplay resource/audio/send.mp3");
 
-        g_print("From %s(%d) to %s(%d) text message: %s\n", main_struct->auth->username, main_struct->auth->id, main_struct->current->username, main_struct->current->id, message);
-
         sendMessage(main_struct->current->id, message, 0);
 
         gtk_entry_set_text(GTK_ENTRY(main_struct->mainbar_input_entry), "");

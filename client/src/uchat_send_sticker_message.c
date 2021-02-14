@@ -59,9 +59,6 @@ void uchat_send_sticker_message(GtkWidget *button, t_main_struct *main_struct) {
 
     system("afplay resource/audio/send.mp3");
 
-    g_print("From %s(%d) to %s(%d) sticker message: %s\n", main_struct->auth->username, main_struct->auth->id, main_struct->current->username, main_struct->current->id, stickername);
-
-    // TODO: uncomment
     sendMessage(main_struct->current->id, stickername, 1);
 
     uchat_mainbar_chat_scroll(main_struct);

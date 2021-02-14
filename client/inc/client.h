@@ -202,9 +202,9 @@ void uchat_switch_mainbar_size(GtkWidget *button, t_main_struct *main_struct);
 void uchat_send_text_message(GtkWidget *button, t_main_struct *main_struct);
 void uchat_send_sticker_message(GtkWidget *button, t_main_struct *main_struct);
 void uchat_send_file_message(GtkWidget *button, t_main_struct *main_struct);
-void uchat_recieve_text_message(guint id, gchar *message);
-void uchat_recieve_sticker_message(guint id, gchar *sticker);
-void uchat_recieve_file_message(guint id, gchar *filename, gchar *path);
+void uchat_recieve_text_message(guint id, gchar *message, gboolean sound);
+void uchat_recieve_sticker_message(guint id, gchar *sticker, gboolean sound);
+void uchat_recieve_file_message(guint id, gchar *filename, gchar *path, gboolean sound);
 void uchat_load_text_message(gint id, gchar *message);
 void uchat_load_sticker_message(gint id, gchar *sticker);
 

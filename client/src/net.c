@@ -83,7 +83,7 @@ void onDataPostAuth(dyad_Event *e) {  // Anything, when user is AUTH'ed
             fputs(binary_content, file);
             fclose(file);
 
-            uchat_recieve_file_message(id, filename, path);
+            uchat_recieve_file_message(id, filename, path, TRUE);
 
             free(filename);
             filename = NULL;
