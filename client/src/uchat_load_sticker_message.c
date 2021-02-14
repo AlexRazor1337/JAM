@@ -1,12 +1,6 @@
 #include "client.h"
 
-void uchat_send_sticker_message(GtkWidget *button, t_main_struct *main_struct) {
-    GList *fixed_child = gtk_container_get_children(GTK_CONTAINER(button));
-    GList *fixed_inner = gtk_container_get_children(GTK_CONTAINER(fixed_child->data));
-
-    gchar *stickername = (gchar *)gtk_label_get_text(GTK_LABEL(fixed_inner->data));
-    fixed_inner = fixed_inner->next;
-
+void uchat_load_sticker_message(gint id, gchar *sticker) {
     GtkWidget *sended_message_box;
     GtkWidget *sended_message_image;
     GtkWidget *sended_time_stamp_label;
@@ -15,7 +9,11 @@ void uchat_send_sticker_message(GtkWidget *button, t_main_struct *main_struct) {
     gtk_widget_set_name(sended_message_box, "sended_message_box");
     gtk_widget_set_halign(sended_message_box, GTK_ALIGN_END);
 
-    sended_message_image = gtk_image_new_from_pixbuf(gtk_image_get_pixbuf(GTK_IMAGE(fixed_inner->data)));
+    gchar *sticker_path = strdup("resource/images/stickers/");
+    sticker_path = strjoin(sticker_path, sticker);
+    sticker_path = strjoin(sticker_path, ".png");
+
+    sended_message_image = gtk_image_new_from_pixbuf(gdk_pixbuf_new_from_file_at_scale(sticker_path, 52, 52, FALSE, NULL));
     gtk_widget_set_name(sended_message_image, "sended_message_image");
     gtk_widget_set_halign(sended_message_image, GTK_ALIGN_END);
 
@@ -36,7 +34,7 @@ void uchat_send_sticker_message(GtkWidget *button, t_main_struct *main_struct) {
     while (chats) {
         GList *inner_data = gtk_container_get_children(GTK_CONTAINER(chats->data));
 
-        if (!strcmp(gtk_label_get_text(GTK_LABEL(main_struct->sidebar_currnet_chat_login_label)), gtk_label_get_text(GTK_LABEL(inner_data->data)))) {
+        if (!strcmp(user_list_get_user_login_by_id(main_struct->user_list, (guint) id), gtk_label_get_text(GTK_LABEL(inner_data->data)))) {
             inner_data = inner_data->next;
 
             gtk_box_pack_start(GTK_BOX(inner_data->data), sended_message_box, FALSE, FALSE, 0);
@@ -54,17 +52,6 @@ void uchat_send_sticker_message(GtkWidget *button, t_main_struct *main_struct) {
     }
 
     g_list_free(g_steal_pointer(&chats));
-    g_list_free(g_steal_pointer(&fixed_inner));
-    g_list_free(g_steal_pointer(&fixed_child));
 
-    system("afplay resource/audio/send.mp3");
-
-    g_print("From %s(%d) to %s(%d) sticker message: %s\n", main_struct->auth->username, main_struct->auth->id, main_struct->current->username, main_struct->current->id, stickername);
-
-    // TODO: uncomment
-    sendMessage(main_struct->current->id, stickername, 1);
-
-    uchat_mainbar_chat_scroll(main_struct);
-
-    if (!button) return;
+    uchat_mainbar_chat_scroll_thread();
 }

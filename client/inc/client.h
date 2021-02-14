@@ -196,6 +196,7 @@ void uchat_recieve_text_message(guint id, gchar *message);
 void uchat_recieve_sticker_message(guint id, gchar *sticker);
 void uchat_recieve_file_message(guint id, gchar *filename, gchar *path);
 void uchat_load_text_message(gint id, gchar *message);
+void uchat_load_sticker_message(gint id, gchar *sticker);
 
 // Jamconfig
 gchar *jamconfig_parse_json(t_main_struct *main_struct);

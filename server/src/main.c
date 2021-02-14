@@ -24,36 +24,36 @@ char *constructMsgJson(int sender_id, char *text, unsigned int timestamp, int ty
     return result;
 }
 
-static void loadMsgHistory(int id) {
-    char **result_table = NULL;
-    int rows, cols;
-    char *querry = malloc(96 + sizeof(int));
-    sprintf(querry, "SELECT id_sender, text, timestamp, type FROM messages WHERE id_reciever = '%d' or id_sender = '%d';", id, id);
-    sqlite3_get_table(db, querry, &result_table, &rows, &cols, NULL);
-    if (rows > 0) {
-        vec_str_t v;
-        vec_init(&v);
-        for (int i = 0; i < rows; i++){
-            char *user_json = constructMsgJson(atoi(result_table[(i + 1) * cols]), result_table[(i + 1) * cols + 1], atol(result_table[(i + 1) * cols + 2]), atoi(result_table[(i + 1) * cols + 3]));
-            vec_push(&v, user_json);
-            //strdel(&user_json);
-        }
-    //TODO CLEAR VEC
-        if (v.length > 1) {
-            char *json = jsonlist_from_jsones(v, (sizeof(int) * 4 + strlen(result_table[1 * cols + 1]) + 128) * v.length);
-            t_connection *client = find_node_uid(id, connections);
-            if (client) dyad_writef(client->stream, "/@loadmsg|%b", json, strlen(json));
-            strdel(&json);
-            vec_deinit(&v);
-        } else {
-            t_connection *client = find_node_uid(id, connections);
-            if (client) dyad_writef(client->stream, "/@loadmsg|[%b]", v.data[0], strlen(v.data[0]));
-        }
-        vec_deinit(&v);
-    }
+// static void loadMsgHistory(int id) {
+//     char **result_table = NULL;
+//     int rows, cols;
+//     char *querry = malloc(96 + sizeof(int));
+//     sprintf(querry, "SELECT id_sender, text, timestamp, type FROM messages WHERE id_reciever = '%d' or id_sender = '%d';", id, id);
+//     sqlite3_get_table(db, querry, &result_table, &rows, &cols, NULL);
+//     if (rows > 0) {
+//         vec_str_t v;
+//         vec_init(&v);
+//         for (int i = 0; i < rows; i++){
+//             char *user_json = constructMsgJson(atoi(result_table[(i + 1) * cols]), result_table[(i + 1) * cols + 1], atol(result_table[(i + 1) * cols + 2]), atoi(result_table[(i + 1) * cols + 3]));
+//             vec_push(&v, user_json);
+//             //strdel(&user_json);
+//         }
+//     //TODO CLEAR VEC
+//         if (v.length > 1) {
+//             char *json = jsonlist_from_jsones(v, (sizeof(int) * 4 + strlen(result_table[1 * cols + 1]) + 128) * v.length);
+//             t_connection *client = find_node_uid(id, connections);
+//             if (client) dyad_writef(client->stream, "/@loadmsg|%b", json, strlen(json));
+//             strdel(&json);
+//             vec_deinit(&v);
+//         } else {
+//             t_connection *client = find_node_uid(id, connections);
+//             if (client) dyad_writef(client->stream, "/@loadmsg|[%b]", v.data[0], strlen(v.data[0]));
+//         }
+//         vec_deinit(&v);
+//     }
 
-    sqlite3_free_table(result_table);
-}
+//     sqlite3_free_table(result_table);
+// }
 
 static void handleMsg(char *msg) {
     int *id = malloc(sizeof(int));
@@ -117,7 +117,7 @@ static void handleGetDialogsList(int id) {
     sqlite3_free_table(result_table);
     strdel(&querry);
     dyad_update();
-    loadMsgHistory(id);
+    //loadMsgHistory(id);
 }
 
 

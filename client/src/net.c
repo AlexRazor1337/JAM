@@ -92,8 +92,6 @@ void onDataPostAuth(dyad_Event *e) {  // Anything, when user is AUTH'ed
             path = NULL;
         }
     } else if (strncmp("/@loadmsg", e->data, 9) == 0) {
-        sleep(3);
-
         char *data = malloc(strlen(e->data));
         sscanf(e->data, "/@loadmsg|%[^\r]", data);
 
@@ -101,6 +99,7 @@ void onDataPostAuth(dyad_Event *e) {  // Anything, when user is AUTH'ed
         array_list *array = json_object_get_array(json);
 
         for (size_t index = 0; index < array->length; index++) {
+            sleep(1);
             json_object *message_json = (json_object *) array->array[index];
 
             int type = (int) json_object_get_int(json_object_object_get(message_json, "type"));
