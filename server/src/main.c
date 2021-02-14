@@ -5,6 +5,18 @@ t_list *connections;
 static void db_prepare() {
     db_exec(db, "CREATE TABLE IF NOT EXISTS users (id integer PRIMARY KEY AUTOINCREMENT, name varchar, login varchar UNIQUE, password varchar, last_visit datetime);", NULL);
     db_exec(db, "CREATE TABLE IF NOT EXISTS messages (id integer PRIMARY KEY AUTOINCREMENT, id_sender integer, id_reciever integer, text text, timestamp datetime, attachment integer, type integer);", NULL);
+    db_exec(db, "CREATE TABLE IF NOT EXISTS files (id integer PRIMARY KEY AUTOINCREMENT, id_sender integer, binary text);", NULL);
+}
+
+static void uploadFile(int sender, char *binary) {
+    char *str = malloc(128 + strlen(binary));
+    sprintf(str, "INSERT INTO files(id_sender, binary) VALUES('%d', '%s');", sender, binary);
+    db_exec(db, str, NULL);
+    strdel(&str);
+}
+
+static void sendFile(int file_id, int receiver_id) {
+
 }
 
 static void register_user(char *name, char *login, char *password) {
@@ -175,11 +187,13 @@ static void postAuthData(dyad_Event *e) {
     printf("PAD: %s\n", e->data);
     char *action = malloc(16);
     int *id = malloc(sizeof(int));
-    sscanf(e->data, "/@%d/%[^|]|", id, action);
+    char *data = malloc(strlen(e->data));
+    sscanf(e->data, "/@%d/%[^|]|%s", id, action, data);
 
     if (strcmp(action, "msg") == 0) handleMsg(e->data);
     else if (strcmp(action, "getchats") == 0) handleGetDialogsList(*id);
     else if (strcmp(action, "adduser") == 0) handleAddUser(e->data);
+    else if (strcmp(action, "upldfile") == 0) uploadFile(id, data);
     strdel(&action);
     free(id);
     id = NULL;
