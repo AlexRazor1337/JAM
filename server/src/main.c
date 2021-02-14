@@ -63,6 +63,47 @@ static void loadMsgHistory(int id) {
     sqlite3_free_table(result_table);
 }
 
+// static void loadFileEvent(dyad_Event *e) {
+//     t_file_wrapper *fw = e->udata;
+//     t_connection *client = fw->client;
+//     printf("GF %d %s\n", client->bytes_left, e->data);
+//     client->file = strcat(client->file, e->data);
+//     client->bytes_left -= strlen(e->data);
+//     if (client->bytes_left < 1) {
+//         printf("FILE DONE\n");
+//         dyad_removeListener(client->stream, DYAD_EVENT_DATA, loadFileEvent, client);
+//         dyad_addListener(client->stream, DYAD_EVENT_DATA, postAuthData, NULL);
+//         dyad_update();
+//         printf("FILE AAAAAAAAAAADONE\n");
+//         t_connection *receiver = find_node_uid(fw->id, connections);
+//         if (receiver) {
+//             printf("FILE Drhjklk;l';l;kjhjgfONE\n");
+//             dyad_writef(receiver->stream, "%b",  client->file, strlen(client->file));
+//             printf("FILE DANONEONE\n");
+//         }
+//     }
+// }
+
+// static void getFile(char* msg) {
+//     int *id = malloc(sizeof(int));
+//     char *reciever_id = malloc(sizeof(int));
+//     int *type = malloc(sizeof(int));
+//     char *filename = malloc(64);
+//     char *file_size = malloc(64);
+//     sscanf(msg, "/@%d/msg|%[^|]|%d|%[^|]|%s", id, reciever_id, type, filename, file_size);
+//     t_connection *client = find_node_uid(*id, connections);
+//     if (client) {
+//         client->file = malloc(atol(file_size));
+//         client->bytes_left = atol(file_size);
+//         printf("SIZE: %d\n", client->bytes_left);
+//         t_file_wrapper *fw = malloc(sizeof(t_file_wrapper));
+//         fw->client = client;
+//         fw->id = atoi(reciever_id);
+//         dyad_removeListener(client->stream, DYAD_EVENT_DATA, postAuthData, NULL);
+//         dyad_addListener(client->stream, DYAD_EVENT_DATA, loadFileEvent, fw);
+//     }
+// }
+
 static void handleMsg(char *msg) {
     int *id = malloc(sizeof(int));
     char *reciever_id = malloc(sizeof(int));
@@ -70,6 +111,16 @@ static void handleMsg(char *msg) {
     char *data = malloc(strlen(msg));
 
     sscanf(msg, "/@%d/msg|%[^|]|%d|%[^\r]", id, reciever_id, type, data);
+    // if (*type == 2) {
+    //     getFile(msg);
+    //     free(id);
+    //     id = NULL;
+    //     free(type);
+    //     type = NULL;
+    //     strdel(&reciever_id);
+    //     strdel(&data);
+    //     return;
+    // }
     if (id && reciever_id && data) {
 
         char *querry = malloc(strlen(msg) + 256);
@@ -178,7 +229,7 @@ static void handleAddUser(char *data) {
     id = NULL;
 }
 
-static void postAuthData(dyad_Event *e) {
+void postAuthData(dyad_Event *e) {
     printf("PAD: %s\n", e->data);
     char *action = malloc(16);
     int *id = malloc(sizeof(int));

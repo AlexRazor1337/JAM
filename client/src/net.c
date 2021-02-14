@@ -20,9 +20,43 @@ void sendMessage(size_t id, char *message, int type) {
     dyad_writef(server_stream, "/@%d/msg|%d|%d|%b", client.uid, id, type, message, strlen(message));
 }
 
-void sendFileMessage(size_t id, char *filename, FILE *file) {
-    dyad_writef(server_stream, "/@%d/msg|%d|2|%b|%r", client.uid, id, filename, strlen(filename), file);
-}
+// void sendFileMessage(size_t id, char *filename, char *path, FILE *file) {
+//     struct stat info;
+//     stat(path, &info);
+    
+//     dyad_writef(server_stream, "/@%d/msg|%d|2|%b|%d", client.uid, id, filename, strlen(filename), info.st_size);
+//     dyad_update();
+//     dyad_writef(server_stream, "%r", file);
+// }
+
+// void onDataPostAuth(dyad_Event *e);
+
+// void getFile(dyad_Event *e) {
+//     printf("IN FILE: %s\n", e->data);
+
+//     if (e->data[0] == '/') {
+//         onDataPostAuth(e);
+//         return;
+//     }
+
+//     client.file = strcat(client.file, e->data);
+//     client.bytes_left -= strlen(e->data);
+//     if (client.bytes_left < 1) {
+//         printf("FILE DONE\n");
+//         dyad_removeListener(server_stream, DYAD_EVENT_DATA, getFile, NULL);
+//         dyad_addListener(server_stream, DYAD_EVENT_DATA, onDataPostAuth, NULL);
+//         dyad_update();
+//         char *path = strdup("resource/usersfiles/");
+//         mkdir(path, S_IRWXU | S_IRWXG | S_IRWXO);
+//         path = strjoin(path, client.filename);
+
+//         FILE *file = fopen(path, "wb");
+//         fputs(client.file, file);
+//         fclose(file);
+
+//         uchat_recieve_file_message(client.id_reciver, path, TRUE);
+//     }
+// }
 
 void onDataPostAuth(dyad_Event *e) {
     printf("Post Auth: %s\n", e->data);
@@ -33,6 +67,18 @@ void onDataPostAuth(dyad_Event *e) {
         client.json_data = malloc(strlen(e->data));
         sscanf(e->data, "/@adduser|%[^\r]", client.json_data);
         uchat_seach_user_add_network();
+    } else if (strncmp("/@recf", e->data, 6) == 0) {
+        // int *id_reciever = (int *) malloc(sizeof(int));
+        // client.filename = (char *) malloc(128);
+        // int *flen = malloc(sizeof(int));
+        
+        // sscanf(e->data, "/@recf|%d|%[^|]|%d", id_reciever, client.filename, flen);
+        // client.bytes_left = *flen;
+        // client.file = malloc(*flen);
+        // client.id_reciver = *id_reciever;
+        // dyad_removeListener(server_stream, DYAD_EVENT_DATA, onDataPostAuth, NULL);
+        // dyad_addListener(server_stream, DYAD_EVENT_DATA, getFile, NULL);
+        // dyad_update();
     } else if (strncmp("/@msg", e->data, 5) == 0) {
         char *data = malloc(strlen(e->data));
         sscanf(e->data, "/@msg|%[^\r]", data);
@@ -54,34 +100,7 @@ void onDataPostAuth(dyad_Event *e) {
 
             uchat_recieve_sticker_message(id, sticker, TRUE);
         } else if (type == 2) {
-            /**
-             * @AlexRazor1337
-             * @vchkhr
-             * {
-             *  "type": "2",
-             *  "sender": "2",
-             *  "data": {
-             *      "filename": "cat_gif_text.gif",
-             *      "content": "..."
-             *  }
-             * }
-             */
-            json_object *file_json = json_object_object_get(json, "data");
-
-            char *filename = (char *) json_object_get_string(json_object_object_get(file_json, "filename"));
-            char *content = (char *) json_object_get_string(json_object_object_get(file_json, "content"));
-
-            char *path = strdup("resource/images/messages/");
-            path = strjoin(path, filename);
-
-            FILE *file = fopen(path, "wb");
-            fputs(content, file);
-            fclose(file);
-
-            uchat_recieve_file_message(id, path, TRUE);
-
-            free(path);
-            path = NULL;
+            // ahahha files
         }
     } else if (strncmp("/@loadmsg", e->data, 9) == 0) {
         sleep(1);
@@ -116,26 +135,28 @@ void onDataPostAuth(dyad_Event *e) {
                     uchat_recieve_sticker_message(sender, data, FALSE);
                 }
             } else if (type == 2) {
-                json_object *data_json = json_object_object_get(message_json, "data");
+                // ahahha files
 
-                char *filename = (char *) json_object_get_string(json_object_object_get(data_json, "filename"));
-                char *content = (char *) json_object_get_string(json_object_object_get(data_json, "filename"));
+                // json_object *data_json = json_object_object_get(message_json, "data");
 
-                char *path = strdup("resource/images/messages/");
-                path = strjoin(path, filename);
+                // char *filename = (char *) json_object_get_string(json_object_object_get(data_json, "filename"));
+                // char *content = (char *) json_object_get_string(json_object_object_get(data_json, "filename"));
 
-                FILE *file = fopen(path, "wb");
-                fputs(content, file);
-                fclose(file);
+                // char *path = strdup("resource/images/messages/");
+                // path = strjoin(path, filename);
 
-                if (sender == (int) main_struct->auth->id) {
-                    uchat_load_file_message(reciever, path);
-                } else {
-                    uchat_recieve_file_message(sender, path, FALSE);
-                }
+                // FILE *file = fopen(path, "wb");
+                // fputs(content, file);
+                // fclose(file);
 
-                free(path);
-                path = NULL;
+                // if (sender == (int) main_struct->auth->id) {
+                //     uchat_load_file_message(reciever, path);
+                // } else {
+                //     uchat_recieve_file_message(sender, path, FALSE);
+                // }
+
+                // free(path);
+                // path = NULL;
             }
         }
     }
@@ -145,7 +166,7 @@ void addUser(char *login) {
     dyad_writef(server_stream, "/@%d/adduser|%s", client.uid, login);
 }
 
-void onDataWaitAuthAnswer(dyad_Event *e) {  // get real user id
+void onDataWaitAuthAnswer(dyad_Event *e) {
     g_print("Real ID: %s\n", e->data);
     char *id = malloc(16);
     char *username = malloc(32);
@@ -166,7 +187,7 @@ void onDataWaitAuthAnswer(dyad_Event *e) {  // get real user id
     }
 }
 
-void onConnectedData(dyad_Event *e) {  // Gets temporal user id
+void onConnectedData(dyad_Event *e) {
     printf("Temporal ID: %s\n", e->data);
     int id = atoi(e->data);
 

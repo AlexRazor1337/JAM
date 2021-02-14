@@ -88,7 +88,7 @@ void uchat_send_file_message(GtkWidget *button, t_main_struct *main_struct) {
 
         system("afplay resource/audio/send.mp3");
 
-        sendFileMessage(main_struct->current->id, filename, source);
+        // sendFileMessage(main_struct->current->id, filename, path, source);
 
         uchat_mainbar_chat_scroll(main_struct);
         uchat_send_text_message(NULL, main_struct);

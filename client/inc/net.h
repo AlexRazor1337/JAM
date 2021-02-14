@@ -14,6 +14,7 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
+// #include <sys/stat.h>
 
 #include "../../libs/dyad/dyad.h"
 #include "../../libs/list/list.h"
@@ -34,6 +35,10 @@ typedef struct s_client {
     char *json_data;
     unsigned long int uid;
     enum State state;
+    // int id_reciver;
+    // char *filename;
+    // char *file;
+    // int bytes_left;
 }              t_client;
 
 typedef struct s_connect_data {
@@ -49,7 +54,7 @@ void *serverInit(void *argument);
 void addUser(char *login);
 void connectToServer();
 void sendMessage(size_t id, char *message, int type);
-void sendFileMessage(size_t id, char *filename, FILE *file);
+void sendFileMessage(size_t id, char *filename, char *path, FILE *file);
 
 int codepoint_len(const uint32_t cp); /* len of associated utf-8 char */
 int utf8_len(const char ch);          /* len of utf-8 encoded char */

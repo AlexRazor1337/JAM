@@ -80,7 +80,6 @@ typedef struct s_main_struct {
 
     GtkWidget *settings_box;
     GtkWidget *uchat_box;
-
     GtkWidget *disconnect_box;
 
     GtkWidget *sidebar_box;

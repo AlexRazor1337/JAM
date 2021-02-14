@@ -37,7 +37,14 @@ typedef struct s_connection {
     int id;
     int uid;
     dyad_Stream *stream;
+    // char* file;
+    // int bytes_left;
 } t_connection;
+
+// typedef struct s_file_wrapper {
+//     int id;
+//     t_connection *client;
+// } t_file_wrapper;
 
 void signal_handler(int signal_number);
 
@@ -50,6 +57,6 @@ t_connection *create_connection(dyad_Stream *stream, t_list *connections);
 void strdel(char **str);
 void daemonize();
 int db_exec(sqlite3 *db, char *querry, char **result);
-
+void postAuthData(dyad_Event *e);
 char *mx_itoa(int n);
 #endif  //JAM_HEADER_H
