@@ -517,18 +517,7 @@ void uchat(GtkWidget *button, t_main_struct *main_struct) {
     gtk_widget_set_name(disconnect_reconnecting_label, "disconnect_reconnecting_label");
     
     disconnect_logo_image = gtk_image_new();
-    // if (!strcmp(main_struct->theme, "default")) {
-        gtk_image_set_from_file(GTK_IMAGE(disconnect_logo_image), "resource/images/jam.png");
-    // }
-    // else if (!strcmp(main_struct->theme, "light")) {
-    //     gtk_image_set_from_file(GTK_IMAGE(profile_image_set_image), "resource/images/light/plus.png");
-    // }
-    // else if (!strcmp(main_struct->theme, "dark")) {
-    //     gtk_image_set_from_file(GTK_IMAGE(profile_image_set_image), "resource/images/dark/plus.png");
-    // }
     gtk_widget_set_name(disconnect_logo_image, "disconnect_logo_image");
-    // gtk_widget_set_size_request(disconnect_logo_image, 40, 40);
-    // gtk_widget_set_halign(disconnect_logo_image, GTK_ALIGN_CENTER);
 
     // Themes
 
@@ -556,7 +545,7 @@ void uchat(GtkWidget *button, t_main_struct *main_struct) {
     gtk_widget_set_size_request(theme_light_button, 150, 150);
     gtk_widget_set_halign(theme_light_button, GTK_ALIGN_CENTER);
 
-    theme_default_button = gtk_button_new_with_label("DEFAUTL");
+    theme_default_button = gtk_button_new_with_label("DEFAULT");
     gtk_widget_set_name(theme_default_button, "theme_default_button");
     gtk_widget_set_size_request(theme_default_button, 150, 150);
     gtk_widget_set_halign(theme_default_button, GTK_ALIGN_CENTER);
@@ -808,6 +797,7 @@ void uchat(GtkWidget *button, t_main_struct *main_struct) {
 
     // disconnect
     main_struct->disconnect = (t_disconnect *)malloc(sizeof(t_disconnect));
+    main_struct->disconnect->disconnect_logo_image = disconnect_logo_image;
 
     // plug
     if (!button) return;

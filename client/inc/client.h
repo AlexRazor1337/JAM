@@ -38,7 +38,7 @@ typedef struct s_settings {
 
 typedef struct s_disconnect {
     gchar *disconnect_reconnecting_label;
-    gchar *disconnect_logo_image;
+    GtkWidget *disconnect_logo_image;
 } t_disconnect;
 
 typedef struct s_main_struct {
