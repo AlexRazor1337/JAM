@@ -54,17 +54,11 @@ void onDataPostAuth(dyad_Event *e) {  // Anything, when user is AUTH'ed
             char *message = (char *) json_object_get_string(message_json);
 
             uchat_recieve_text_message(id, message);
-
-            //free(message); // CAUSES SEGFAULT
-            //message = NULL;
         } else if (type == 1) {
             json_object *sticker_json = json_object_object_get(json, "data");
             char *sticker = (char *) json_object_get_string(sticker_json);
 
             uchat_recieve_sticker_message(id, sticker);
-
-            //free(sticker);  // CAUSES SEGFAULT
-            //sticker = NULL;
         } else if (type == 2) {
             /**
              * JSON BE LIKE:
