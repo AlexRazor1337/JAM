@@ -34,7 +34,7 @@ uninstall: clean
 	@rm -f uchat
 
 clean:
-	@rm -rf server_data
+	# @rm -rf server_data
 	@rm -f chats.json
 
 reinstall: uninstall all

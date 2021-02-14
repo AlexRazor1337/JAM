@@ -38,14 +38,7 @@ void onDataPostAuth(dyad_Event *e) {  // Anything, when user is AUTH'ed
         sscanf(e->data, "/@msg|%[^\r]", data);
 
         json_object *json = json_tokener_parse(data);
-        int type = 0;
-
-        json_object_object_foreach(json, key, value) {
-            if (!strcmp(key, "type")) {
-                type = json_object_get_int(value);
-                break;
-            }
-        }
+        int type = json_object_get_int(json_object_object_get(json, "type"));
 
         json_object *sender_id = json_object_object_get(json, "sender");
         int id = json_object_get_int(sender_id);
@@ -97,6 +90,35 @@ void onDataPostAuth(dyad_Event *e) {  // Anything, when user is AUTH'ed
             binary_content = NULL;
             free(path);
             path = NULL;
+        }
+    } else if (strncmp("/@loadmsg", e->data, 9) == 0) {
+        sleep(3);
+
+        char *data = malloc(strlen(e->data));
+        sscanf(e->data, "/@loadmsg|%[^\r]", data);
+
+        json_object *json = json_tokener_parse(data);
+        array_list *array = json_object_get_array(json);
+
+        for (size_t index = 0; index < array->length; index++) {
+            json_object *message_json = (json_object *) array->array[index];
+
+            int type = (int) json_object_get_int(json_object_object_get(message_json, "type"));
+            int sender = (int) json_object_get_int(json_object_object_get(message_json, "sender"));
+            char *data= (char *) json_object_get_string(json_object_object_get(message_json, "data"));
+
+            // TODO check in which chat it was writen
+            if (type == 0) {
+                if (sender == (int) main_struct->auth->id) {
+                    uchat_load_text_message(sender, data);
+                } else {
+                    uchat_recieve_text_message(sender, data);
+                }
+            } else if (type == 1) {
+
+            } else if (type == 2) {
+
+            }
         }
     }
 }

@@ -68,10 +68,11 @@ char *jsonlist_from_jsones(vec_str_t v, int bsize) {
         free(final_json);
         return NULL;
     }
-
+    printf("TE: %s\n", v.data[0]);
     sprintf(final_json, "[%s", (char *)v.data[0]);
     int i; char *val;
     vec_foreach(&v, val, i) {
+         printf("CE: %s\n", v.data[i]);
         if (i > 0) {
             if (i == v.length - 1) {
                 sprintf(cursor, "%s,%s]", cursor_2, (char *)v.data[i]);

@@ -195,6 +195,7 @@ void uchat_send_file_message(GtkWidget *button, t_main_struct *main_struct);
 void uchat_recieve_text_message(guint id, gchar *message);
 void uchat_recieve_sticker_message(guint id, gchar *sticker);
 void uchat_recieve_file_message(guint id, gchar *filename, gchar *path);
+void uchat_load_text_message(gint id, gchar *message);
 
 // Jamconfig
 gchar *jamconfig_parse_json(t_main_struct *main_struct);
