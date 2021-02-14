@@ -21,8 +21,8 @@ void sendMessage(size_t id, char *message, int type) {
 }
 
 // TODO: change msg -> filemsg (check right string formater) (uncomment in another file)
-void sendSFileMessage(size_t id, char *filename, char *binary_content) {
-    dyad_writef(server_stream, "/@%d/msg|%d|%b|%b", client.uid, id, filename, strlen(filename), binary_content, strlen(binary_content));
+void sendFileMessage(size_t id, char *filename, FILE *file) {
+    dyad_writef(server_stream, "/@%d/msg|%d|%b|%r", client.uid, id, filename, strlen(filename), file);
 }
 
 void onDataPostAuth(dyad_Event *e) {  // Anything, when user is AUTH'ed

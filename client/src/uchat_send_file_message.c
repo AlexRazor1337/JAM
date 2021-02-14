@@ -18,20 +18,6 @@ void uchat_send_file_message(GtkWidget *button, t_main_struct *main_struct) {
 
         FILE *source = fopen(path, "rb");
 
-        fseek(source, 0, SEEK_END);
-        gint length = ftell(source);
-        fseek(source, 0, SEEK_SET);
-
-        binary_content = (gchar *)malloc(length + 1);
-
-        for (gint i = 0; i < length; i++) {
-            binary_content[i] = fgetc(source);
-        }
-
-        binary_content[length] = '\0';
-
-        fclose(source);
-
         GtkWidget *sended_message_box;
         GtkWidget *sended_message_image;
         GtkWidget *sended_time_stamp_label;
@@ -103,13 +89,13 @@ void uchat_send_file_message(GtkWidget *button, t_main_struct *main_struct) {
 
         system("afplay resource/audio/send.mp3");
 
-        // TODO: uncomment
-        // sendFileMessage(main_struct->current->id, filename, binary_content);
+        sendFileMessage(main_struct->current->id, filename, source);
 
         uchat_mainbar_chat_scroll(main_struct);
         uchat_send_text_message(NULL, main_struct);
 
         strdel(&path);
+        fclose(source);
     }
 
     gtk_widget_destroy(dialog);
