@@ -23,7 +23,6 @@ void sign_in_submit(GtkWidget *button, t_main_struct *main_struct) {
 
                     t_connect_data *connect_data = (t_connect_data *)malloc(sizeof(t_connect_data));
 
-                    // connect_data->thread;
                     connect_data->to_sign_up = false;
                     pthread_create(&connect_data->thread, NULL, serverInit, connect_data);
 

@@ -38,6 +38,7 @@ typedef struct s_client {
 
 typedef struct s_connect_data {
     pthread_t thread;
+    pthread_attr_t attr;
     bool to_sign_up;
 }              t_connect_data;
 

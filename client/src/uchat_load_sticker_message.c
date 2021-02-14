@@ -39,7 +39,9 @@ void uchat_load_sticker_message(gint id, gchar *sticker) {
 
             gtk_box_pack_start(GTK_BOX(inner_data->data), sended_message_box, FALSE, FALSE, 0);
 
-            gtk_widget_show_all(chats->data);
+            if (!strcmp(main_struct->current->login, user_list_get_user_login_by_id(main_struct->user_list, id))) {
+                gtk_widget_show_all(chats->data);
+            }
 
             g_list_free(g_steal_pointer(&inner_data));
 
@@ -53,5 +55,6 @@ void uchat_load_sticker_message(gint id, gchar *sticker) {
 
     g_list_free(g_steal_pointer(&chats));
 
-    uchat_mainbar_chat_scroll_thread();
+    pthread_t thread;
+    pthread_create(&thread, NULL, uchat_mainbar_chat_scroll_thread, NULL);
 }

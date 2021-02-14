@@ -15,9 +15,9 @@ static void uploadFile(int sender, char *binary) {
     strdel(&str);
 }
 
-static void sendFile(int file_id, int receiver_id) {
+// static void sendFile(int file_id, int receiver_id) {
 
-}
+// }
 
 static void register_user(char *name, char *login, char *password) {
     char *str = malloc(196);
@@ -192,7 +192,7 @@ static void postAuthData(dyad_Event *e) {
     if (strcmp(action, "msg") == 0) handleMsg(e->data);
     else if (strcmp(action, "getchats") == 0) handleGetDialogsList(*id);
     else if (strcmp(action, "adduser") == 0) handleAddUser(e->data);
-    else if (strcmp(action, "upldfile") == 0) uploadFile(id, data);
+    else if (strcmp(action, "upldfile") == 0) uploadFile(*id, data);
     strdel(&action);
     free(id);
     id = NULL;
@@ -330,8 +330,8 @@ int main(int argc, char *argv[]) {
 
 #pragma endregion sockets_init
 //TODO Delete
-    // register_user("MemoMmm", "memo", "qwerty");
-    // register_user("Ayyyyy", "lmao", "qwerty");
+    register_user("MemoMmm", "memo", "qwerty");
+    register_user("Ayyyyy", "lmao", "qwerty");
     while (dyad_getStreamCount() > 0) {
         dyad_update();
         check_disconnected_client();

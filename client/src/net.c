@@ -14,6 +14,7 @@ char* replace_char(char* str, char find, char replace){
 }
 
 void sendMessage(size_t id, char *message, int type) {
+    printf("WTF?: %s %d\n", message, type);
     replace_char(message, '"', ' ');
     replace_char(message, '\\', ' ');
     dyad_writef(server_stream, "/@%d/msg|%d|%d|%b", client.uid, id, type, message, strlen(message));
@@ -92,6 +93,8 @@ void onDataPostAuth(dyad_Event *e) {  // Anything, when user is AUTH'ed
             path = NULL;
         }
     } else if (strncmp("/@loadmsg", e->data, 9) == 0) {
+        sleep(1);
+
         char *data = malloc(strlen(e->data));
         sscanf(e->data, "/@loadmsg|%[^\r]", data);
 
@@ -99,22 +102,25 @@ void onDataPostAuth(dyad_Event *e) {  // Anything, when user is AUTH'ed
         array_list *array = json_object_get_array(json);
 
         for (size_t index = 0; index < array->length; index++) {
-            sleep(1);
             json_object *message_json = (json_object *) array->array[index];
 
             int type = (int) json_object_get_int(json_object_object_get(message_json, "type"));
             int sender = (int) json_object_get_int(json_object_object_get(message_json, "sender"));
+            int reciever = (int) json_object_get_int(json_object_object_get(message_json, "id_reciever"));
             char *data= (char *) json_object_get_string(json_object_object_get(message_json, "data"));
 
-            // TODO check in which chat it was writen
             if (type == 0) {
                 if (sender == (int) main_struct->auth->id) {
-                    uchat_load_text_message(sender, data);
+                    uchat_load_text_message(reciever, data);
                 } else {
                     uchat_recieve_text_message(sender, data);
                 }
             } else if (type == 1) {
-
+                if (sender == (int) main_struct->auth->id) {
+                    uchat_load_sticker_message(reciever, data);
+                } else {
+                    uchat_recieve_sticker_message(sender, data);
+                }
             } else if (type == 2) {
 
             }
@@ -177,12 +183,12 @@ void connectToServer() {
 }
 
 void *serverInit(void *argument) {
-    connect_data = (t_connect_data *)argument;
+    connect_data = (t_connect_data *) argument;
 
     connectToServer();
     client.state = UNAUTH;
-
-    while (dyad_getStreamCount() > 0) {  // main loop
+    
+    while (true) {  // main loop
         if (client.state == AUTH) {
             if (dyad_getState(server_stream) == DYAD_STATE_CLOSED) onDisconnect();
         }
