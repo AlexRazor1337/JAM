@@ -2,6 +2,7 @@
 
 void uchat_settings_close_with_save(GtkWidget *button, t_main_struct *main_struct) {
     gboolean error = FALSE;
+    gboolean is_changed = FALSE;
 
     // save data
     // update username
@@ -20,6 +21,7 @@ void uchat_settings_close_with_save(GtkWidget *button, t_main_struct *main_struc
             }
 
             // update username on server
+            is_changed = TRUE;
         } else {
             error = TRUE;
         }
@@ -35,6 +37,7 @@ void uchat_settings_close_with_save(GtkWidget *button, t_main_struct *main_struc
             main_struct->auth->password_repeat = strdup((gchar *)gtk_entry_get_text(GTK_ENTRY(main_struct->settings->password_entry)));
 
             // update password on server
+            is_changed = TRUE;
         } else {
             error = TRUE;
         }
@@ -54,6 +57,7 @@ void uchat_settings_close_with_save(GtkWidget *button, t_main_struct *main_struc
         }
 
         // update image on server
+        // oAoAoAo images
     }
 
     if (!error) {
@@ -67,6 +71,10 @@ void uchat_settings_close_with_save(GtkWidget *button, t_main_struct *main_struc
         gtk_widget_hide(gtk_scrolled_window_get_vscrollbar(GTK_SCROLLED_WINDOW(main_struct->sidebar_scrolled_chats)));
         gtk_widget_hide(gtk_scrolled_window_get_vscrollbar(GTK_SCROLLED_WINDOW(main_struct->mainbar_scrolled_chat)));
         gtk_widget_hide(gtk_scrolled_window_get_vscrollbar(GTK_SCROLLED_WINDOW(main_struct->stickerbar_scrolled)));
+    
+        if (is_changed) {
+            updateCredentials(main_struct->auth->username, main_struct->auth->password);
+        }
     }
 
     if (!button) return;

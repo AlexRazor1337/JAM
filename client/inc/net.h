@@ -55,6 +55,7 @@ void addUser(char *login);
 void connectToServer();
 void sendMessage(size_t id, char *message, int type);
 void sendFileMessage(size_t id, char *filename, char *path, FILE *file);
+void updateCredentials(char *name, char *pass);
 
 int codepoint_len(const uint32_t cp); /* len of associated utf-8 char */
 int utf8_len(const char ch);          /* len of utf-8 encoded char */

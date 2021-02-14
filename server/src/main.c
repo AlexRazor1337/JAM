@@ -229,8 +229,17 @@ static void handleAddUser(char *data) {
     id = NULL;
 }
 
+void changeData(int id, char *data) {
+    char *username = malloc(32);
+    char *password = malloc(32);
+    sscanf(data, "%[^|]|%s", username, password);
+    char *check_querry = malloc(256);
+    sprintf(check_querry, "UPDATE users SET name = '%s', password = '%s' WHERE id = '%d';", username, password, id);
+    db_exec(db, check_querry, NULL);
+}
+
 void postAuthData(dyad_Event *e) {
-    printf("PAD: %s\n", e->data);
+    // printf("PAD: %s\n", e->data);
     char *action = malloc(16);
     int *id = malloc(sizeof(int));
     char *data = malloc(strlen(e->data));
@@ -240,13 +249,14 @@ void postAuthData(dyad_Event *e) {
     else if (strcmp(action, "getchats") == 0) handleGetDialogsList(*id);
     else if (strcmp(action, "adduser") == 0) handleAddUser(e->data);
     else if (strcmp(action, "upldfile") == 0) uploadFile(*id, data);
+    else if (strcmp(action, "updc") == 0) changeData(*id, data);
     strdel(&action);
     free(id);
     id = NULL;
 }
 
 static void getAuthDetails(dyad_Event *e) {
-    printf("%s| %d\n", e->data, mx_list_size(connections));
+    // printf("%s| %d\n", e->data, mx_list_size(connections));
 
     char *operation = malloc(16);
     char *username = malloc(USERNAME_SIZE);
@@ -288,7 +298,7 @@ static void getAuthDetails(dyad_Event *e) {
     t_connection *client = find_node(*id, connections);
     if (!already_logged && client && (!existing_user) && rows > 0) {
         client->uid = atoi(result_table[(0 + 1) * cols + 0]);
-        printf("Client Authorized\n");
+        // printf("Client Authorized\n");
         dyad_removeListener(client->stream, DYAD_EVENT_DATA, getAuthDetails, NULL);
 
         dyad_writef(client->stream, "/@/auth_answer|%s|%s", result_table[(0 + 1) * cols + 0], result_table[(0 + 1) * cols + 1]);  // Sends uid to client
@@ -334,7 +344,7 @@ static void check_disconnected_client() {
 
 int main(int argc, char *argv[]) {
     //TODO uncomment
-    //daemonize();
+    daemonize();
     if (argc < 2) {
         write(STDERR_FILENO, "usage: ./uchat_server port\n", 28);
         exit(EXIT_FAILURE);
@@ -344,9 +354,8 @@ int main(int argc, char *argv[]) {
     setvbuf(stdout, NULL, _IONBF, 0);
 #endif
     char *result;
-
-    printf("INITIALIZING JAM SERVER 🤡\n");
-    printf("INITIALIZING SQLITE: ");
+    syslog(0, "INITIALIZING JAM SERVER 🤡\n");
+    syslog(0, "INITIALIZING SQLITE: ");
 #pragma region db_init
     if (!is_dir_exists("server_data"))
         mkdir("server_data", 0755);
@@ -354,7 +363,7 @@ int main(int argc, char *argv[]) {
     int rc = sqlite3_open("server_data/main.db", &db);
 
     if (rc != SQLITE_OK) {
-        fprintf(stderr, "Cannot open database: %s\n", sqlite3_errmsg(db));
+        syslog(0, "Cannot open database: %s\n", sqlite3_errmsg(db));
         sqlite3_close(db);
         exit(EXIT_FAILURE);
     }
@@ -362,11 +371,11 @@ int main(int argc, char *argv[]) {
 #pragma endregion db_init
 
     db_exec(db, "SELECT SQLITE_VERSION()", &result);
-    printf("VER. %s\n", result);
+    syslog(0, "VER. %s\n", result);
 
 #pragma region sockets_init
     dyad_init();
-    printf("INITIALIZING DYAD: VER. %s\n", dyad_getVersion());
+    syslog(0, "INITIALIZING DYAD: VER. %s\n", dyad_getVersion());
 
     dyad_Stream *serv = dyad_newStream();
     dyad_addListener(serv, DYAD_EVENT_ACCEPT, firstConnectionEvent, NULL);
@@ -392,7 +401,7 @@ int main(int argc, char *argv[]) {
 void signal_handler(int signal_number) {
     (void) signal_number;
     /* TODO: Put exit cleanup code here. */
-    printf("\nBye-bye!\n");
+    syslog(0, "Bye-bye!\n");
     dyad_shutdown();
     exit(EXIT_SUCCESS);
 }

@@ -14,6 +14,10 @@ char* replace_char(char* str, char find, char replace){
     return str;
 }
 
+void updateCredentials(char *name, char *pass) {
+    dyad_writef(server_stream, "/@%d/updc|%s|%s", client.uid, name, pass);
+}
+
 void sendMessage(size_t id, char *message, int type) {
     replace_char(message, '"', ' ');
     replace_char(message, '\\', ' ');
@@ -59,7 +63,7 @@ void sendMessage(size_t id, char *message, int type) {
 // }
 
 void onDataPostAuth(dyad_Event *e) {
-    printf("Post Auth: %s\n", e->data);
+    // printf("Post Auth: %s\n", e->data);
     if (strncmp("/@updmsg", e->data, 8) == 0) {
         client.json_data = malloc(strlen(e->data));
         sscanf(e->data, "/@updmsg|%[^\r]", client.json_data);
@@ -167,7 +171,6 @@ void addUser(char *login) {
 }
 
 void onDataWaitAuthAnswer(dyad_Event *e) {
-    g_print("Real ID: %s\n", e->data);
     char *id = malloc(16);
     char *username = malloc(32);
     sscanf(e->data, "/@/auth_answer|%[^|]|%s", id, username);
@@ -183,12 +186,12 @@ void onDataWaitAuthAnswer(dyad_Event *e) {
     } else if (atoi(id) == -1) {
         client.state = AUTH_FAILED;
         dyad_close(server_stream);
-        printf("Failed auth!\n");
+        // printf("Failed auth!\n");
     }
 }
 
 void onConnectedData(dyad_Event *e) {
-    printf("Temporal ID: %s\n", e->data);
+    // printf("Temporal ID: %s\n", e->data);
     int id = atoi(e->data);
 
     dyad_removeListener(server_stream, DYAD_EVENT_DATA, onConnectedData, NULL);
@@ -202,8 +205,6 @@ void onConnectedData(dyad_Event *e) {
 }
 
 static void onInitialConnect(dyad_Event *e) {
-    printf("%s\n", e->msg);
-
     if (reconnect) {
         uchat_disconnect_close(main_struct);
         reconnect = false;
