@@ -343,7 +343,6 @@ static void check_disconnected_client() {
 
 
 int main(int argc, char *argv[]) {
-    //TODO uncomment
     daemonize();
     if (argc < 2) {
         write(STDERR_FILENO, "usage: ./uchat_server port\n", 28);

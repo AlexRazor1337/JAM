@@ -205,6 +205,7 @@ void onConnectedData(dyad_Event *e) {
 }
 
 static void onInitialConnect(dyad_Event *e) {
+    (void) e;
     if (reconnect) {
         uchat_disconnect_close(main_struct);
         reconnect = false;
