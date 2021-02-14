@@ -20,12 +20,11 @@ void sendMessage(size_t id, char *message, int type) {
     dyad_writef(server_stream, "/@%d/msg|%d|%d|%b", client.uid, id, type, message, strlen(message));
 }
 
-// TODO: change msg -> filemsg (check right string formater) (uncomment in another file)
 void sendFileMessage(size_t id, char *filename, FILE *file) {
-    dyad_writef(server_stream, "/@%d/msg|%d|%b|%r", client.uid, id, filename, strlen(filename), file);
+    dyad_writef(server_stream, "/@%d/msg|%d|2|%b|%r", client.uid, id, filename, strlen(filename), file);
 }
 
-void onDataPostAuth(dyad_Event *e) {  // Anything, when user is AUTH'ed
+void onDataPostAuth(dyad_Event *e) {
     printf("Post Auth: %s\n", e->data);
     if (strncmp("/@updmsg", e->data, 8) == 0) {
         client.json_data = malloc(strlen(e->data));
@@ -43,6 +42,7 @@ void onDataPostAuth(dyad_Event *e) {  // Anything, when user is AUTH'ed
 
         json_object *sender_id = json_object_object_get(json, "sender");
         int id = json_object_get_int(sender_id);
+
         if (type == 0) {
             json_object *message_json = json_object_object_get(json, "data");
             char *message = (char *) json_object_get_string(message_json);
@@ -55,40 +55,31 @@ void onDataPostAuth(dyad_Event *e) {  // Anything, when user is AUTH'ed
             uchat_recieve_sticker_message(id, sticker, TRUE);
         } else if (type == 2) {
             /**
-             * JSON BE LIKE:
+             * @AlexRazor1337
+             * @vchkhr
              * {
-             *  "type": "file",
+             *  "type": "2",
+             *  "sender": "2",
              *  "data": {
              *      "filename": "cat_gif_text.gif",
-             *      "binary_content": "..."
+             *      "content": "..."
              *  }
              * }
              */
             json_object *file_json = json_object_object_get(json, "data");
-            char *filename = NULL;
-            char *binary_content = NULL;
 
-            json_object_object_foreach(file_json, key, value) {
-                if (!strcmp(key, "filename")) {
-                    filename = strdup(json_object_get_string(value));
-                } else if (!strcmp(key, "binary_content")){
-                    binary_content = strdup(json_object_get_string(value));
-                }
-            }
+            char *filename = (char *) json_object_get_string(json_object_object_get(file_json, "filename"));
+            char *content = (char *) json_object_get_string(json_object_object_get(file_json, "content"));
 
             char *path = strdup("resource/images/messages/");
             path = strjoin(path, filename);
 
             FILE *file = fopen(path, "wb");
-            fputs(binary_content, file);
+            fputs(content, file);
             fclose(file);
 
-            uchat_recieve_file_message(id, filename, path, TRUE);
+            uchat_recieve_file_message(id, path, TRUE);
 
-            free(filename);
-            filename = NULL;
-            free(binary_content);
-            binary_content = NULL;
             free(path);
             path = NULL;
         }
@@ -107,22 +98,44 @@ void onDataPostAuth(dyad_Event *e) {  // Anything, when user is AUTH'ed
             int type = (int) json_object_get_int(json_object_object_get(message_json, "type"));
             int sender = (int) json_object_get_int(json_object_object_get(message_json, "sender"));
             int reciever = (int) json_object_get_int(json_object_object_get(message_json, "id_reciever"));
-            char *data= (char *) json_object_get_string(json_object_object_get(message_json, "data"));
 
             if (type == 0) {
+                char *data = (char *) json_object_get_string(json_object_object_get(message_json, "data"));
+
                 if (sender == (int) main_struct->auth->id) {
                     uchat_load_text_message(reciever, data);
                 } else {
                     uchat_recieve_text_message(sender, data, FALSE);
                 }
             } else if (type == 1) {
+                char *data = (char *) json_object_get_string(json_object_object_get(message_json, "data"));
+
                 if (sender == (int) main_struct->auth->id) {
                     uchat_load_sticker_message(reciever, data);
                 } else {
                     uchat_recieve_sticker_message(sender, data, FALSE);
                 }
             } else if (type == 2) {
+                json_object *data_json = json_object_object_get(message_json, "data");
 
+                char *filename = (char *) json_object_get_string(json_object_object_get(data_json, "filename"));
+                char *content = (char *) json_object_get_string(json_object_object_get(data_json, "filename"));
+
+                char *path = strdup("resource/images/messages/");
+                path = strjoin(path, filename);
+
+                FILE *file = fopen(path, "wb");
+                fputs(content, file);
+                fclose(file);
+
+                if (sender == (int) main_struct->auth->id) {
+                    uchat_load_file_message(reciever, path);
+                } else {
+                    uchat_recieve_file_message(sender, path, FALSE);
+                }
+
+                free(path);
+                path = NULL;
             }
         }
     }

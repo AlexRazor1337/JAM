@@ -8,7 +8,6 @@ void uchat_send_file_message(GtkWidget *button, t_main_struct *main_struct) {
         GtkFileChooser *chooser = GTK_FILE_CHOOSER(dialog);
 
         gchar *path = gtk_file_chooser_get_filename(chooser);
-        gchar *binary_content = NULL;
         gchar *filename = path;
 
         while (strchr(filename, '/') != NULL) {

@@ -1,6 +1,6 @@
 #include "client.h"
 
-void uchat_recieve_file_message(guint id, gchar *filename, gchar *path, gboolean sound) {
+void uchat_recieve_file_message(guint id, gchar *path, gboolean sound) {
     GtkWidget *recieved_message_box;
     GtkWidget *recieved_message_image;
     GtkWidget *recieved_time_stamp_label;
@@ -8,6 +8,13 @@ void uchat_recieve_file_message(guint id, gchar *filename, gchar *path, gboolean
     recieved_message_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     gtk_widget_set_name(recieved_message_box, "recieved_message_box");
     gtk_widget_set_halign(recieved_message_box, GTK_ALIGN_START);
+
+    gchar *filename = path;
+
+    while (strchr(filename, '/') != NULL) {
+        filename = strchr(filename, '/');
+        filename++;
+    }
 
     recieved_message_image = gtk_image_new();
     gtk_widget_set_name(recieved_message_image, "recieved_message_image");

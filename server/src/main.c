@@ -15,10 +15,6 @@ static void uploadFile(int sender, char *binary) {
     strdel(&str);
 }
 
-// static void sendFile(int file_id, int receiver_id) {
-
-// }
-
 static void register_user(char *name, char *login, char *password) {
     char *str = malloc(196);
     sprintf(str, "INSERT INTO users(name, login, password) VALUES('%s', '%s', '%s');", name, login, password);

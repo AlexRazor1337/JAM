@@ -204,9 +204,10 @@ void uchat_send_sticker_message(GtkWidget *button, t_main_struct *main_struct);
 void uchat_send_file_message(GtkWidget *button, t_main_struct *main_struct);
 void uchat_recieve_text_message(guint id, gchar *message, gboolean sound);
 void uchat_recieve_sticker_message(guint id, gchar *sticker, gboolean sound);
-void uchat_recieve_file_message(guint id, gchar *filename, gchar *path, gboolean sound);
+void uchat_recieve_file_message(guint id, gchar *path, gboolean sound);
 void uchat_load_text_message(gint id, gchar *message);
 void uchat_load_sticker_message(gint id, gchar *sticker);
+void uchat_load_file_message(gint id, gchar *filename);
 
 // Jamconfig
 gchar *jamconfig_parse_json(t_main_struct *main_struct);
