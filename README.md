@@ -19,20 +19,8 @@ When everything is installed just call ```make```.
 
 ## Usage
 
-TODO
+Start server, specifying it's port, 8080 for example: ```./uchat_server 8080```
+It will daemonize server and print it's new PID.
 
-# Documentation
-
-JAM consists of two sides: client app and server.
-
-## Server
-
-Server side uses SQLite as a database to store info about users, messages and files.
-<details>
-  <summary>DB schema for server side:</summary>
-
-  ![Server Schema](/docs/database_shema_server.png)
-</details>
-
-
-## Client
+Then, start client app with ip adress and port as arguments: ```./uchat 127.0.0.1 8080```
+It will open or client window, so you can register new account or authorize to existing one(**note:** ```make reinstall``` deletes .db file, so be careful).
