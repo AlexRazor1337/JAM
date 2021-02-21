@@ -12,7 +12,7 @@ We used this libraries:
 ## Installation
 
 All libraries except two(gtk3 and json-c) are included with source code.
-gtk3 and json-c must be installed separately:
+gtk3 and json-c must be installed separately:  
 **apt-get**:  
 ```apt-get install libgtk-3-dev libjson-c-dev```  
 **pacman**:  
