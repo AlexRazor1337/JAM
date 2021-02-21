@@ -13,7 +13,12 @@ We used this libraries:
 
 All libraries except two(gtk3 and json-c) are included with source code.
 gtk3 and json-c must be installed separately:
-```apt-get install libgtk-3-dev json-c``` or ```pacman -S gtk3 json-c```
+**apt-get**:  
+```apt-get install libgtk-3-dev libjson-c-dev```  
+**pacman**:  
+```pacman -S gtk3 json-c```  
+**dnf**:  
+```dnf install gtk3 json-c```  
 
 When everything is installed just call ```make```.
 
